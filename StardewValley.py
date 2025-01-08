@@ -118,7 +118,7 @@ def main():
         render_scene()
         glfw.swap_buffers(window)
 
-    glfw.terminate()
+    glfw.terminate() 
 
 
 if __name__ == "__main__":
