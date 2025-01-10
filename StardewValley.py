@@ -431,7 +431,6 @@ def key_callback(window, key, scancode, action, mods):
         if min_x <= new_x <= max_x and min_y <= new_y <= max_y:
             character_position[0], character_position[1] = new_x, new_y
 
-
 def main():
     if not glfw.init():
         return
