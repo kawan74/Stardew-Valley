@@ -466,6 +466,7 @@ def draw_cloud(x, y, scale=1.0):
     
     glPopMatrix()
 
+
 def main():
     if not glfw.init():
         return
