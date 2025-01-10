@@ -414,7 +414,7 @@ def render_scene():
         glTranslatef(i[0], i[1], 0.0)  # Posiciona a planta
         glScalef(0.5, 0.5, 1)
         draw_plant()
-        glPopMatrix()
+        glPopMatrix() 
 
 
 
