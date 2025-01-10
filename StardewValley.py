@@ -8,6 +8,7 @@ from time import time
 character_position = [0.0, -0.5]
 movement_speed = 0.05
 
+plant_positions = [[0.9 - i * 0.12, -0.8 + j *0.2] for i in range(5) for j in range(3)]
 
 posChicken = [
     [-0.55, -0.35, 1],
@@ -52,7 +53,6 @@ def draw_fence():
         for vertex in vertices:
             glVertex2fv(vertex)
         glEnd()
-
 
 def draw_house():
     glColor3f(0.9, 0.6, 0.3)  # casa
@@ -201,7 +201,6 @@ def draw_animal_fence():
             glVertex2fv(vertex)
         glEnd()
 
-
 def draw_chicken():
     # Corpo da galinha (retângulo branco)
     glColor3f(1.0, 1.0, 1.0)  # Branco
@@ -247,7 +246,7 @@ def update_chickens():
 
     # Limites do cercado
     min_x, max_x = -0.85, -0.35
-    min_y, max_y = -0.85, -0.35
+    min_y, max_y = -0.85, -0.15
 
     # Atualizar posições das galinhas
     for i, pos in enumerate(posChicken):
@@ -265,7 +264,7 @@ def update_chickens():
 
     # Troca direções aleatoriamente a cada 1 segundo
     if time() - last_update > 1:
-        directions = [[random.uniform(-0.01, 0.01), random.uniform(-0.01, 0.01)] for _ in posChicken]
+        directions = [[random.uniform(-0.005, 0.005), random.uniform(-0.005, 0.005)] for _ in posChicken]
         last_update = time()
 
 def draw_character():
@@ -321,6 +320,32 @@ def draw_character():
     glVertex2f(-0.1, 0.0)
     glEnd()
 
+def draw_plant():
+    # Desenhar caule
+    glColor3f(0.4, 0.25, 0.1)  # Marrom
+    glBegin(GL_QUADS)
+    for vertex in [[-0.02, 0.0], [0.02, 0.0], [0.02, 0.3], [-0.02, 0.3]]:
+        glVertex2fv(vertex)
+    glEnd()
+
+    # Desenhar folhas (cor roxa)
+    glColor3f(0.41, 0.24, 0.62)
+    leaf_triangles = [
+        [[-0.1, 0.2], [0.0, 0.25], [-0.1, 0.3]],  # Esquerda
+        [[0.1, 0.2], [0.0, 0.25], [0.1, 0.3]],    # Direita
+        [[-0.05, 0.3], [0.05, 0.3], [0.0, 0.4]],  # Topo
+        [[-0.1, 0.1], [-0.02, 0.15], [-0.1, 0.2]],  # Esquerda inferior
+        [[0.1, 0.1], [0.02, 0.15], [0.1, 0.2]],    # Direita inferior
+        [[-0.1, 0.25], [-0.02, 0.3], [-0.1, 0.35]],  # Esquerda superior
+        [[0.1, 0.25], [0.02, 0.3], [0.1, 0.35]]    # Direita superior
+    ]
+    for triangle in leaf_triangles:
+        glBegin(GL_TRIANGLES)
+        for vertex in triangle:
+            glVertex2fv(vertex)
+        glEnd()
+
+
 
 def render_scene():
     # Limpa a tela
@@ -351,7 +376,6 @@ def render_scene():
     draw_animal_fence()
     glPopMatrix()
 
-
     # Desenha árvores
     glPushMatrix()
     glTranslatef(-0.7, 0.0, 0.0)
@@ -378,18 +402,34 @@ def render_scene():
     draw_character()
     glPopMatrix()
 
+    for i in plant_positions:
+        glPushMatrix()
+        glTranslatef(i[0], i[1], 0.0)  # Posiciona a planta
+        glScalef(0.5, 0.5, 1)
+        draw_plant()
+        glPopMatrix()
+
 def key_callback(window, key, scancode, action, mods):
     global character_position
 
+    min_x, max_x = -1.0, 1.0
+    min_y, max_y = -1.3, 0.2
+
     if action == glfw.PRESS or action == glfw.REPEAT:
+        new_x, new_y = character_position[0], character_position[1]
+
         if key == glfw.KEY_W:  # Move para cima
-            character_position[1] += movement_speed
+            new_y += movement_speed
         elif key == glfw.KEY_S:  # Move para baixo
-            character_position[1] -= movement_speed
+            new_y -= movement_speed
         elif key == glfw.KEY_A:  # Move para a esquerda
-            character_position[0] -= movement_speed
+            new_x -= movement_speed
         elif key == glfw.KEY_D:  # Move para a direita
-            character_position[0] += movement_speed
+            new_x += movement_speed
+
+        # Verifica se a nova posição está dentro dos limites
+        if min_x <= new_x <= max_x and min_y <= new_y <= max_y:
+            character_position[0], character_position[1] = new_x, new_y
 
 def main():
     if not glfw.init():
