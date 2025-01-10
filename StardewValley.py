@@ -356,6 +356,12 @@ def render_scene():
     # Desenha a grama
     draw_grass()
 
+    #Desenha as nuvens
+
+    draw_cloud(-0.7, 0.7, 1.2)  # Nuvem maior
+    draw_cloud(0.3, 0.6, 0.8)   # Nuvem menor
+    draw_cloud(-0.1, 0.8, 1.0)  # Nuvem média
+
     # Desenha a cerca longa atrás da casa
     glPushMatrix()
     glTranslatef(0.0, 0.3, 0.0)  # Ajusta a posição da cerca atrás da casa
@@ -375,6 +381,7 @@ def render_scene():
     glScale(0.7, 0.7, 1)
     draw_animal_fence()
     glPopMatrix()
+
 
     # Desenha árvores
     glPushMatrix()
@@ -409,6 +416,8 @@ def render_scene():
         draw_plant()
         glPopMatrix()
 
+
+
 def key_callback(window, key, scancode, action, mods):
     global character_position
 
@@ -430,6 +439,32 @@ def key_callback(window, key, scancode, action, mods):
         # Verifica se a nova posição está dentro dos limites
         if min_x <= new_x <= max_x and min_y <= new_y <= max_y:
             character_position[0], character_position[1] = new_x, new_y
+
+def draw_cloud(x, y, scale=1.0):
+    glPushMatrix()
+    glTranslatef(x, y, 0)
+    glScalef(scale, scale, 1.0)
+    
+    # Cor branca para a nuvem
+    glColor3f(1.0, 1.0, 1.0)
+    
+    # Componentes da nuvem (círculos)
+    positions = [
+        (-0.2, 0.0), (0.0, 0.0), (0.2, 0.0),  # Parte inferior
+        (-0.1, 0.1), (0.1, 0.1)               # Parte superior
+    ]
+    for cx, cy in positions:
+        glPushMatrix()
+        glTranslatef(cx, cy, 0)
+        glBegin(GL_TRIANGLE_FAN)
+        glVertex2f(0, 0)
+        for angle in range(361):
+            rad = radians(angle)
+            glVertex2f(cos(rad) * 0.15, sin(rad) * 0.15)
+        glEnd()
+        glPopMatrix()
+    
+    glPopMatrix()
 
 def main():
     if not glfw.init():
