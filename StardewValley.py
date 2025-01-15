@@ -22,12 +22,12 @@ directions = [[random.uniform(-0.005, 0.005), random.uniform(-0.005, 0.005)] for
 last_update = time()
 
 def setup_background():
-    glClearColor(0.5, 0.8, 1.0, 1.0)  # céu
+    glClearColor(0.5, 0.8, 1.0, 1.0) 
 
 def draw_fence():
-    # Postes verticais mais compridos e espaçados
-    glColor3f(0.5, 0.3, 0.1)  # Cor marrom para os postes
-    for i in range(-10, 11):  # Mais postes para torná-la mais comprida
+    
+    glColor3f(0.5, 0.3, 0.1)  
+    for i in range(-10, 11):  
         x = i * 0.1
         vertices = [
             [x - 0.01, -0.2],
@@ -40,11 +40,11 @@ def draw_fence():
             glVertex2fv(vertex)
         glEnd()
 
-    # Barras horizontais conectando os postes
-    glColor3f(0.6, 0.4, 0.2)  # Cor mais clara para as barras
-    for y_offset in [-0.05, 0.05]:  # Duas barras horizontais
+   
+    glColor3f(0.6, 0.4, 0.2)  
+    for y_offset in [-0.05, 0.05]:  
         vertices = [
-            [-1.0, y_offset - 0.01],  # Estende-se de -1.0 a 1.0
+            [-1.0, y_offset - 0.01],  
             [-1.0, y_offset + 0.01],
             [1.0, y_offset + 0.01],
             [1.0, y_offset - 0.01]
@@ -55,7 +55,7 @@ def draw_fence():
         glEnd()
 
 def draw_house():
-    glColor3f(0.9, 0.6, 0.3)  # casa
+    glColor3f(0.9, 0.6, 0.3)  
     body_vertices = [
         [-0.3, -0.2],
         [-0.3, 0.2],
@@ -107,7 +107,7 @@ def draw_house():
 def draw_grass():
     glColor3f(0.3, 0.7, 0.2)  # grama
     grass_vertices = [
-        [-1, -1.3],  # Garantir que a grama fique no "chão"
+        [-1, -1.3],  
         [-1.0, 0.2],
         [1.0, 0.2],
         [1.0, -1.3]
@@ -118,7 +118,7 @@ def draw_grass():
     glEnd()
 
 def draw_tree():
-    # tronco da Ãrvore
+    # tronco da arrvore
     verticesTronco = [
         [-0.1, 0.0],
         [ 0.1, 0.0],
@@ -131,7 +131,7 @@ def draw_tree():
         glVertex2fv(v)
     glEnd()
 
-    # copa da Ãrvore
+    # copa da arvore
     verticesCopa = []
     qtdDiv = 180
     deltaAng = 360/qtdDiv
@@ -152,8 +152,8 @@ def draw_tree():
     glPopMatrix()
 
 def draw_animal_fence():
-    # Postes nos cantos
-    glColor3f(0.5, 0.3, 0.1)  # Cor marrom para os postes
+    
+    glColor3f(0.5, 0.3, 0.1)  
     corner_positions = [
         [-0.5, -0.5],
         [-0.5, 0.5],
@@ -172,8 +172,8 @@ def draw_animal_fence():
             glVertex2fv(vertex)
         glEnd()
 
-    # Barras horizontais (superior e inferior)
-    glColor3f(0.6, 0.4, 0.2)  # Cor mais clara para as barras
+  
+    glColor3f(0.6, 0.4, 0.2)
     horizontal_positions = [-0.5, 0.5]
     for y in horizontal_positions:
         vertices = [
@@ -187,7 +187,7 @@ def draw_animal_fence():
             glVertex2fv(vertex)
         glEnd()
 
-    # Barras verticais (esquerda e direita)
+   
     vertical_positions = [-0.5, 0.5]
     for x in vertical_positions:
         vertices = [
@@ -202,8 +202,8 @@ def draw_animal_fence():
         glEnd()
 
 def draw_chicken():
-    # Corpo da galinha (retângulo branco)
-    glColor3f(1.0, 1.0, 1.0)  # Branco
+    
+    glColor3f(1.0, 1.0, 1.0)  
     body_vertices = [
         [-0.2, -0.2],
         [-0.2, 0.2],
@@ -215,8 +215,8 @@ def draw_chicken():
         glVertex2fv(vertex)
     glEnd()
 
-    # Crista da galinha (retângulo vermelho)
-    glColor3f(1.0, 0.0, 0.0)  # Vermelho
+
+    glColor3f(1.0, 0.0, 0.0) 
     crest_vertices = [
         [-0.05, 0.2],
         [-0.05, 0.3],
@@ -228,8 +228,8 @@ def draw_chicken():
         glVertex2fv(vertex)
     glEnd()
 
-    # Bico da galinha (retângulo amarelo)
-    glColor3f(1.0, 1.0, 0.0)  # Amarelo
+    
+    glColor3f(1.0, 1.0, 0.0)  
     beak_vertices = [
         [0.1, -0.05],
         [0.1, 0.05],
@@ -321,23 +321,23 @@ def draw_character():
     glEnd()
 
 def draw_plant():
-    # Desenhar caule
-    glColor3f(0.4, 0.25, 0.1)  # Marrom
+    
+    glColor3f(0.4, 0.25, 0.1)  
     glBegin(GL_QUADS)
     for vertex in [[-0.02, 0.0], [0.02, 0.0], [0.02, 0.3], [-0.02, 0.3]]:
         glVertex2fv(vertex)
     glEnd()
 
-    # Desenhar folhas (cor roxa)
+    
     glColor3f(0.41, 0.24, 0.62)
     leaf_triangles = [
-        [[-0.1, 0.2], [0.0, 0.25], [-0.1, 0.3]],  # Esquerda
-        [[0.1, 0.2], [0.0, 0.25], [0.1, 0.3]],    # Direita
-        [[-0.05, 0.3], [0.05, 0.3], [0.0, 0.4]],  # Topo
-        [[-0.1, 0.1], [-0.02, 0.15], [-0.1, 0.2]],  # Esquerda inferior
-        [[0.1, 0.1], [0.02, 0.15], [0.1, 0.2]],    # Direita inferior
-        [[-0.1, 0.25], [-0.02, 0.3], [-0.1, 0.35]],  # Esquerda superior
-        [[0.1, 0.25], [0.02, 0.3], [0.1, 0.35]]    # Direita superior
+        [[-0.1, 0.2], [0.0, 0.25], [-0.1, 0.3]],  
+        [[0.1, 0.2], [0.0, 0.25], [0.1, 0.3]],   
+        [[-0.05, 0.3], [0.05, 0.3], [0.0, 0.4]],  
+        [[-0.1, 0.1], [-0.02, 0.15], [-0.1, 0.2]],  
+        [[0.1, 0.1], [0.02, 0.15], [0.1, 0.2]],    
+        [[-0.1, 0.25], [-0.02, 0.3], [-0.1, 0.35]],  
+        [[0.1, 0.25], [0.02, 0.3], [0.1, 0.35]]   
     ]
     for triangle in leaf_triangles:
         glBegin(GL_TRIANGLES)
@@ -357,7 +357,6 @@ def render_scene():
     draw_grass()
 
     #Desenha as nuvens
-
     draw_cloud(-0.7, 0.7, 1.2)  # Nuvem maior
     draw_cloud(0.3, 0.6, 0.8)   # Nuvem menor
     draw_cloud(-0.1, 0.8, 1.0)  # Nuvem média
@@ -399,7 +398,7 @@ def render_scene():
     for pos in posChicken:
         glPushMatrix()
         glTranslatef(pos[0], pos[1], pos[2])  # Posicione a galinha no cenário
-        glScalef(0.2, 0.2, 1.0)        # Ajuste o tamanho da galinha
+        glScalef(0.2, 0.2, 1.0)     
         draw_chicken()
         glPopMatrix()
 
