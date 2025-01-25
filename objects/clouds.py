@@ -2,6 +2,7 @@ from OpenGL.GL import *
 from math import cos, sin
 
 def draw_cloud(x, y, size):
+    glColor3f(1,1,1)
     glPushMatrix()
     glTranslatef(x, y, 0.0)  # Ajusta a posição da nuvem
     glScalef(size, size, 1.0)  # Ajusta o tamanho da nuvem

@@ -4,7 +4,6 @@ from objects.grass import draw_grass
 from objects.tree import draw_tree
 from objects.fence import draw_animal_fence
 from objects.house import draw_house
-from objects.river import draw_river
 from objects.character import draw_character
 from objects.clouds import draw_cloud 
 from objects.chicken import pos_chickens, draw_chicken, update_chickens 
@@ -86,3 +85,4 @@ def render_scene():
         glScalef(0.5, 0.5, 1)
         draw_plant()
         glPopMatrix()
+
