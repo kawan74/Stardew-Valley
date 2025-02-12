@@ -25,10 +25,10 @@ def setup_background():
     glClearColor(0.5, 0.8, 1.0, 1.0)  # céu
 
 def draw_fence():
-    # Postes verticais mais compridos e espaçados
     glColor3f(0.5, 0.3, 0.1)  # Cor marrom para os postes
-    for i in range(-10, 11):  # Mais postes para torná-la mais comprida
-        x = i * 0.1
+    post_positions = [-0.1, 0.1]  # Posições dos dois postes
+
+    for x in post_positions:
         vertices = [
             [x - 0.01, -0.2],
             [x - 0.01, 0.1],
@@ -40,14 +40,14 @@ def draw_fence():
             glVertex2fv(vertex)
         glEnd()
 
-    # Barras horizontais conectando os postes
+    # Barras horizontais conectando os dois postes
     glColor3f(0.6, 0.4, 0.2)  # Cor mais clara para as barras
     for y_offset in [-0.05, 0.05]:  # Duas barras horizontais
         vertices = [
-            [-1.0, y_offset - 0.01],  # Estende-se de -1.0 a 1.0
-            [-1.0, y_offset + 0.01],
-            [1.0, y_offset + 0.01],
-            [1.0, y_offset - 0.01]
+            [-0.1, y_offset - 0.01],  # Conecta do poste esquerdo ao direito
+            [-0.1, y_offset + 0.01],
+            [0.1, y_offset + 0.01],
+            [0.1, y_offset - 0.01]
         ]
         glBegin(GL_QUADS)
         for vertex in vertices:
@@ -345,6 +345,31 @@ def draw_plant():
             glVertex2fv(vertex)
         glEnd()
 
+def draw_cloud(x, y, scale=1.0):
+    glPushMatrix()
+    glTranslatef(x, y, 0)
+    glScalef(scale, scale, 1.0)
+    
+    # Cor branca para a nuvem
+    glColor3f(1.0, 1.0, 1.0)
+    
+    # Componentes da nuvem (círculos)
+    positions = [
+        (-0.2, 0.0), (0.0, 0.0), (0.2, 0.0),  # Parte inferior
+        (-0.1, 0.1), (0.1, 0.1)               # Parte superior
+    ]
+    for cx, cy in positions:
+        glPushMatrix()
+        glTranslatef(cx, cy, 0)
+        glBegin(GL_TRIANGLE_FAN)
+        glVertex2f(0, 0)
+        for angle in range(361):
+            rad = radians(angle)
+            glVertex2f(cos(rad) * 0.15, sin(rad) * 0.15)
+        glEnd()
+        glPopMatrix()
+    
+    glPopMatrix()
 
 
 def render_scene():
@@ -362,7 +387,6 @@ def render_scene():
                0, 0, 0,   # definindo o alvo da cÃ¢mera (origem do sistema de coordenadas global)
                0, 1, 0)   # definindo a direÃ§Ã£o up da cÃ¢mera (direÃ§Ã£o do eixo y do sistema de coordenadas global)
 
-    update_chickens()
 
     # Desenha a grama
     draw_grass()
@@ -374,10 +398,17 @@ def render_scene():
     draw_cloud(-0.1, 0.8, 1.0)  # Nuvem média
 
     # Desenha a cerca longa atrás da casa
-    glPushMatrix()
-    glTranslatef(0.0, 0.3, 0.0)  # Ajusta a posição da cerca atrás da casa
-    draw_fence()
-    glPopMatrix()
+    for i in range(5):
+        glPushMatrix()
+        glTranslatef(-i*0.25, 0.3, 0.0)  # Ajusta a posição da cerca atrás da casa
+        draw_fence()
+        glPopMatrix()
+
+    for i in range(5):
+        glPushMatrix()
+        glTranslatef(i*0.25, 0.3, 0.0)  # Ajusta a posição da cerca atrás da casa
+        draw_fence()
+        glPopMatrix()
 
     # Translada a casa para cima e desenha
     glPushMatrix()
@@ -412,6 +443,9 @@ def render_scene():
         glScalef(0.2, 0.2, 1.0)        # Ajuste o tamanho da galinha
         draw_chicken()
         glPopMatrix()
+
+    update_chickens()
+
 
     glPushMatrix()
     glTranslatef(character_position[0], character_position[1], 0.0)  # Usa a posição atualizada
@@ -448,38 +482,13 @@ def key_callback(window, key, scancode, action, mods):
         if min_x <= new_x <= max_x and min_y <= new_y <= max_y:
             character_position[0], character_position[1] = new_x, new_y
 
-def draw_cloud(x, y, scale=1.0):
-    glPushMatrix()
-    glTranslatef(x, y, 0)
-    glScalef(scale, scale, 1.0)
-    
-    # Cor branca para a nuvem
-    glColor3f(1.0, 1.0, 1.0)
-    
-    # Componentes da nuvem (círculos)
-    positions = [
-        (-0.2, 0.0), (0.0, 0.0), (0.2, 0.0),  # Parte inferior
-        (-0.1, 0.1), (0.1, 0.1)               # Parte superior
-    ]
-    for cx, cy in positions:
-        glPushMatrix()
-        glTranslatef(cx, cy, 0)
-        glBegin(GL_TRIANGLE_FAN)
-        glVertex2f(0, 0)
-        for angle in range(361):
-            rad = radians(angle)
-            glVertex2f(cos(rad) * 0.15, sin(rad) * 0.15)
-        glEnd()
-        glPopMatrix()
-    
-    glPopMatrix()
 
 
 def main():
     if not glfw.init():
         return
 
-    window = glfw.create_window(500, 500, "Stardew Valley", None, None)
+    window = glfw.create_window(800, 800, "Stardew Valley", None, None)
     if not window:
         glfw.terminate()
         return
