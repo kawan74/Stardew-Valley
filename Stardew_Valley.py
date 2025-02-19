@@ -33,15 +33,26 @@ def configurar_camera():
     if modo_camera == '3D':
         gluPerspective(100, 1.0, 0.1, 100)
     else:
-        glOrtho(-7, 7, -7, 7, -15, 10)  # Aumentado para maior visibilidade
+        glOrtho(-7, 7, -7, 7, -15, 10)  
     glMatrixMode(GL_MODELVIEW)
 
 def configurar_cenario():
     glClearColor(0.5, 0.8, 1.0, 1.0) if modo_camera == '2D' else glClearColor(0.1, 0.1, 0.3, 1.0)
+    
     glEnable(GL_LIGHTING)
-    glEnable(GL_LIGHT0)
-    glLightfv(GL_LIGHT0, GL_POSITION, [0, 5, 5, 1])
-    glLightfv(GL_LIGHT0, GL_DIFFUSE, [1, 1, 1, 1])
+    glEnable(GL_LIGHT0)  
+    
+    # Posição da luz: mais para frente e para o alto
+    glLightfv(GL_LIGHT0, GL_POSITION, [1, 3, 2, 1])  
+    
+    # Intensidade da luz difusa 
+    glLightfv(GL_LIGHT0, GL_DIFFUSE, [1, 1, 1, 1])  
+    
+    # Luz ambiente mais forte para evitar escuridão total
+    glLightfv(GL_LIGHT0, GL_AMBIENT, [0.3, 0.3, 0.3, 1])
+    
+    glEnable(GL_DEPTH_TEST)  
+
 
 def iniciar_opengl():
     configurar_cenario()
@@ -49,7 +60,7 @@ def iniciar_opengl():
     configurar_camera()
 
 def desenhar_chao():
-    glColor3f(0.1, 0.7, 0.1)  # Verde
+    glColor3f(0.1, 0.7, 0.1)  
     glBegin(GL_QUADS)
     
     if modo_camera == '3D':
@@ -67,7 +78,7 @@ def desenhar_chao():
 
 def desenhar_casa():
     glDisable(GL_LIGHTING)  
-    glColor3f(0.8, 0.5, 0.2)  # Marrom para a casa
+    glColor3f(0.8, 0.5, 0.2)  
     glBegin(GL_QUADS)
     
     if modo_camera == '3D':
@@ -76,14 +87,14 @@ def desenhar_casa():
         glVertex3f(0.3, -0.6, 0.0)
         glVertex3f(0.3, -1, 0.0)
     else:  # Ajuste para 2D
-        glVertex2f(-0.5, -3.0)  # Ajustado para tocar o chão
-        glVertex2f(-0.5, -2.0)  # Mais alto
+        glVertex2f(-0.5, -3.0)  
+        glVertex2f(-0.5, -2.0)  
         glVertex2f(0.5, -2.0)
         glVertex2f(0.5, -3.0)
     
     glEnd()
     
-    glColor3f(0.7, 0.1, 0.1)  # Vermelho para o telhado
+    glColor3f(0.7, 0.1, 0.1)  
     glBegin(GL_TRIANGLES)
     
     if modo_camera == '3D':
@@ -93,7 +104,7 @@ def desenhar_casa():
     else:  # Ajuste para 2D
         glVertex2f(-0.55, -2.0)
         glVertex2f(0.55, -2.0)
-        glVertex2f(0.0, -1.5)  # Topo do telhado
+        glVertex2f(0.0, -1.5)  
         
     glEnd() 
 
@@ -111,8 +122,6 @@ def desenhar_cenario():
         glTranslatef(0, -3, 0)
         desenhar_chao()
         desenhar_casa()
-
-
 
 
 def process_input(window):
