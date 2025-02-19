@@ -16,7 +16,7 @@ rotation_speed = 50.0
 modo_camera = '3D'
 
 def init_window(width, height, title):
-    if not glfw.init():
+    if not glfw.init(): 
         return None
     
     window = glfw.create_window(width, height, title, None, None)
@@ -33,11 +33,15 @@ def configurar_camera():
     if modo_camera == '3D':
         gluPerspective(100, 1.0, 0.1, 100)
     else:
-        glOrtho(-5, 5, -5, 5, -10, 10)
+        glOrtho(-7, 7, -7, 7, -10, 10)  # Aumentado para maior visibilidade
     glMatrixMode(GL_MODELVIEW)
 
 def configurar_cenario():
     glClearColor(0.5, 0.8, 1.0, 1.0) if modo_camera == '2D' else glClearColor(0.1, 0.1, 0.3, 1.0)
+    glEnable(GL_LIGHTING)
+    glEnable(GL_LIGHT0)
+    glLightfv(GL_LIGHT0, GL_POSITION, [0, 5, 5, 1])
+    glLightfv(GL_LIGHT0, GL_DIFFUSE, [1, 1, 1, 1])
 
 def iniciar_opengl():
     configurar_cenario()
@@ -47,43 +51,29 @@ def iniciar_opengl():
 def desenhar_chao():
     glColor3f(0.1, 0.7, 0.1)  # Verde
     glBegin(GL_QUADS)
-    glVertex3f(-5, -5, -5)
-    glVertex3f(5, -5, -5)
-    glVertex3f(5, -5, 5)
-    glVertex3f(-5, -5, 5)
+    glVertex3f(-5, -1, -5)
+    glVertex3f(5, -1, -5)
+    glVertex3f(5, -1, 5)
+    glVertex3f(-5, -1, 5)
     glEnd()
 
 def desenhar_casa():
+    glDisable(GL_LIGHTING)  
     glColor3f(0.8, 0.5, 0.2)  # Marrom para a casa
     glBegin(GL_QUADS)
-    glVertex3f(-0.3, -0.2, 0.0)
-    glVertex3f(-0.3, 0.2, 0.0)
-    glVertex3f(0.3, 0.2, 0.0)
-    glVertex3f(0.3, -0.2, 0.0)
+    glVertex3f(-0.3, -1, 0.0)
+    glVertex3f(-0.3, -0.6, 0.0)
+    glVertex3f(0.3, -0.6, 0.0)
+    glVertex3f(0.3, -1, 0.0)
     glEnd()
     
     glColor3f(0.7, 0.1, 0.1)  # Vermelho para o telhado
     glBegin(GL_TRIANGLES)
-    glVertex3f(-0.35, 0.2, 0.0)
-    glVertex3f(0.35, 0.2, 0.0)
-    glVertex3f(0.0, 0.5, 0.0)
+    glVertex3f(-0.35, -0.6, 0.0)
+    glVertex3f(0.35, -0.6, 0.0)
+    glVertex3f(0.0, -0.3, 0.0)
     glEnd()
-    
-    glColor3f(0.4, 0.2, 0.1)  # Marrom escuro para a porta
-    glBegin(GL_QUADS)
-    glVertex3f(-0.05, -0.2, 0.0)
-    glVertex3f(-0.05, 0.05, 0.0)
-    glVertex3f(0.05, 0.05, 0.0)
-    glVertex3f(0.05, -0.2, 0.0)
-    glEnd()
-    
-    glColor3f(0.5, 0.8, 1.0)  # Azul claro para as janelas
-    for janela in [[[-0.25, 0.0, 0.0], [-0.15, 0.0, 0.0], [-0.15, 0.1, 0.0], [-0.25, 0.1, 0.0]],
-                   [[0.15, 0.0, 0.0], [0.25, 0.0, 0.0], [0.25, 0.1, 0.0], [0.15, 0.1, 0.0]]]:
-        glBegin(GL_QUADS)
-        for vertex in janela:
-            glVertex3fv(vertex)
-        glEnd()
+
 
 def desenhar_cenario():
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
@@ -94,9 +84,10 @@ def desenhar_cenario():
         glRotatef(camera_angle, 0, 1, 0)
     else:
         glTranslatef(0, -3, 0)
-    
+
     desenhar_chao()
     desenhar_casa()
+
 
 def process_input(window):
     global camera_pos, camera_angle, last_time, modo_camera
@@ -139,5 +130,5 @@ def main():
     
     glfw.terminate()
 
-if __name__ == '__main__':
+if __name__ == '__main__':  
     main()
