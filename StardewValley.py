@@ -378,14 +378,14 @@ def render_scene():
 
     glMatrixMode(GL_PROJECTION)      # modo de matriz: matriz de projeÃ§Ã£o
     glLoadIdentity()                 # carregando a matriz identidade
-    glFrustum(-1, 1, -1, 1, 2, 100)  # definindo a matriz de projeÃ§Ã£o perspectiva
+    # glFrustum(-1, 1, -1, 1, 2, 100)  # definindo a matriz de projeÃ§Ã£o perspectiva
                                      # glFrustum(left, right, bottom, top, near, far)
 
     glMatrixMode(GL_MODELVIEW)     # modo de matriz: matriz de cÃ¢mera e de transformaÃ§Ã£o local
     glLoadIdentity()               # carregando matriz identidade
-    gluLookAt(0,-1.5,3,   # definindo a posiÃ§Ã£o da cÃ¢mera
-               0, 0, 0,   # definindo o alvo da cÃ¢mera (origem do sistema de coordenadas global)
-               0, 1, 0)   # definindo a direÃ§Ã£o up da cÃ¢mera (direÃ§Ã£o do eixo y do sistema de coordenadas global)
+    # gluLookAt(0,-1.5,3,   # definindo a posiÃ§Ã£o da cÃ¢mera
+    #            0, 0, 0,   # definindo o alvo da cÃ¢mera (origem do sistema de coordenadas global)
+    #            0, 1, 0)   # definindo a direÃ§Ã£o up da cÃ¢mera (direÃ§Ã£o do eixo y do sistema de coordenadas global)
 
 
     # Desenha a grama

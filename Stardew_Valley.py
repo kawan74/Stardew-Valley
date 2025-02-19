@@ -2,196 +2,170 @@ from OpenGL.GL import *
 from OpenGL.GLU import *
 import glfw
 import time
-import math 
+import math
 
-# Configurações da câmera
-camera_pos = [0, 0, -3]
-camera_angle = 0
-last_time = time.time()
+class JogoOpenGL:
+    def __init__(self, largura=800, altura=800, titulo='Jogo'):
+        self.largura = largura
+        self.altura = altura
+        self.titulo = titulo
+        self.window = None
+        self.camera_pos = [0, 0, -3]
+        self.yaw = -90.0 
+        self.pitch = 0.0  
+        self.sensibilidade = 0.1
+        self.last_x = largura // 2
+        self.last_y = altura // 2
+        self.first_mouse = True
+        self.modo_camera = '3D'
+        self.habilitar_movimento_mouse = True  
 
-# Velocidade da câmera
-smooth_speed = 0.3
-rotation_speed = 50.0
+    def iniciar_janela(self):
+        if not glfw.init():
+            return False
 
-# Modo da câmera (3D ou 2D)
-modo_camera = '3D'
+        self.window = glfw.create_window(self.largura, self.altura, self.titulo, None, None)
+        if not self.window:
+            glfw.terminate()
+            return False
 
-def init_window(width, height, title):
-    if not glfw.init(): 
-        return None
+        glfw.make_context_current(self.window)
+        glfw.set_cursor_pos_callback(self.window, self.mouse_callback)
+        glfw.set_key_callback(self.window, self.teclado_callback)
+        return True
     
-    window = glfw.create_window(width, height, title, None, None)
-    if not window:
-        glfw.terminate()
-        return None
+    def configurar_camera(self):
+        glMatrixMode(GL_PROJECTION)
+        glLoadIdentity()
+        if self.modo_camera == '3D':
+            gluPerspective(100, self.largura / self.altura, 0.1, 100)
+        else:
+            glOrtho(-7, 7, -7, 7, -15, 10)
+        glMatrixMode(GL_MODELVIEW)
     
-    glfw.make_context_current(window)
-    return window
+    def configurar_cenario(self):
+        glClearColor(0.1, 0.1, 0.3, 1.0)
+        glEnable(GL_DEPTH_TEST)
+    
+    def iniciar_opengl(self):
+        self.configurar_cenario()
+        self.configurar_camera()
 
-def configurar_camera():
-    glMatrixMode(GL_PROJECTION)
-    glLoadIdentity()
-    if modo_camera == '3D':
-        gluPerspective(100, 1.0, 0.1, 100)
-    else:
-        glOrtho(-7, 7, -7, 7, -15, 10)  
-    glMatrixMode(GL_MODELVIEW)
-
-def configurar_cenario():
-    glClearColor(0.5, 0.8, 1.0, 1.0) if modo_camera == '2D' else glClearColor(0.1, 0.1, 0.3, 1.0)
-    
-    glEnable(GL_LIGHTING)
-    glEnable(GL_LIGHT0)  
-    
-    # Posição da luz: mais para frente e para o alto
-    glLightfv(GL_LIGHT0, GL_POSITION, [1, 3, 2, 1])  
-    
-    # Intensidade da luz difusa 
-    glLightfv(GL_LIGHT0, GL_DIFFUSE, [1, 1, 1, 1])  
-    
-    # Luz ambiente mais forte para evitar escuridão total
-    glLightfv(GL_LIGHT0, GL_AMBIENT, [0.3, 0.3, 0.3, 1])
-    
-    glEnable(GL_DEPTH_TEST)  
-
-
-def iniciar_opengl():
-    configurar_cenario()
-    glEnable(GL_DEPTH_TEST)
-    configurar_camera()
-
-def desenhar_chao():
-    glColor3f(0.1, 0.7, 0.1)    
-    glBegin(GL_QUADS)
-    
-    if modo_camera == '3D':
+    def desenhar_chao(self):
+        glColor3f(0.1, 0.7, 0.1)
+        glBegin(GL_QUADS)
         glVertex3f(-5, -1, -5)
         glVertex3f(5, -1, -5)
         glVertex3f(5, -1, 5)
         glVertex3f(-5, -1, 5)
-    else:  # Ajuste para 2D
-        glVertex2f(-7, -7)
-        glVertex2f(7, -7)
-        glVertex2f(7, -3)
-        glVertex2f(-7, -3)
-    
-    glEnd()
+        glEnd()
 
-def desenhar_casa():
-    glDisable(GL_LIGHTING)  
-    glColor3f(0.8, 0.5, 0.2)  
-    glBegin(GL_QUADS)
-    
-    if modo_camera == '3D':
+    def desenhar_casa(self):
+        glColor3f(0.8, 0.5, 0.2)
+        glBegin(GL_QUADS)
         glVertex3f(-0.3, -1, 0.0)
         glVertex3f(-0.3, -0.6, 0.0)
         glVertex3f(0.3, -0.6, 0.0)
         glVertex3f(0.3, -1, 0.0)
-    else:  # Ajuste para 2D
-        glVertex2f(-0.5, -3.0)  
-        glVertex2f(-0.5, -2.0)  
-        glVertex2f(0.5, -2.0)
-        glVertex2f(0.5, -3.0)
-    
-    glEnd()
-    
-    glColor3f(0.7, 0.1, 0.1)  
-    glBegin(GL_TRIANGLES)
-    
-    if modo_camera == '3D':
+        glEnd()
+
+        # Telhado
+        glColor3f(0.5, 0.2, 0.1)
+        glBegin(GL_TRIANGLES)
         glVertex3f(-0.35, -0.6, 0.0)
         glVertex3f(0.35, -0.6, 0.0)
         glVertex3f(0.0, -0.3, 0.0)
-    else:  # Ajuste para 2D
-        glVertex2f(-0.55, -2.0)
-        glVertex2f(0.55, -2.0)
-        glVertex2f(0.0, -1.5)  
-        
-    glEnd() 
+        glEnd()
 
-def desenhar_nuvem(x, y, z=0):
-    glColor3f(1, 1, 1)
-    glBegin(GL_TRIANGLE_FAN)
-    for i in range(360):
-        angulo = math.radians(i)
-        glVertex3f(x + 0.3 * math.cos(angulo), y + 0.2 * math.sin(angulo), z)
-    glEnd()
-    
-    glBegin(GL_TRIANGLE_FAN)
-    for i in range(360):
-        angulo = math.radians(i)
-        glVertex3f(x + 0.2 * math.cos(angulo) + 0.2, y + 0.2 * math.sin(angulo), z)
-    glEnd()
-    
-    glBegin(GL_TRIANGLE_FAN)
-    for i in range(360):
-        angulo = math.radians(i)
-        glVertex3f(x + 0.2 * math.cos(angulo) - 0.2, y + 0.2 * math.sin(angulo), z)
-    glEnd()
+    def desenhar_nuvem(self, x, y, z=0):
+        glColor3f(1, 1, 1)
+        for deslocamento in [0, 0.2, -0.2]:
+            glBegin(GL_TRIANGLE_FAN)
+            for i in range(360):
+                angulo = math.radians(i)
+                glVertex3f(x + 0.2 * math.cos(angulo) + deslocamento, y + 0.2 * math.sin(angulo), z)
+            glEnd()
 
+    def desenhar_cenario(self):
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
+        glLoadIdentity()
 
-def desenhar_cenario():
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
-    glLoadIdentity()
-    
-    if modo_camera == '3D':
-        glTranslatef(camera_pos[0], camera_pos[1], camera_pos[2])
-        glRotatef(camera_angle, 0, 1, 0)
-        desenhar_chao()
-        desenhar_casa()
-        desenhar_nuvem(-1, 2, -2)
-        desenhar_nuvem(1.5, 2.5, -3)
-        
-    else:
-        glTranslatef(0, -3, 0)
-        desenhar_chao()
-        desenhar_casa()
-        desenhar_nuvem(-2, 3)
-        desenhar_nuvem(2, 3.5)
-        desenhar_nuvem(-5, 1)
-        desenhar_nuvem(5, 1)
+        # Configuração da câmera
+        look_x = math.cos(math.radians(self.yaw)) * math.cos(math.radians(self.pitch))
+        look_y = math.sin(math.radians(self.pitch))
+        look_z = math.sin(math.radians(self.yaw)) * math.cos(math.radians(self.pitch))
 
+        gluLookAt(
+            self.camera_pos[0], self.camera_pos[1], self.camera_pos[2],
+            self.camera_pos[0] + look_x, self.camera_pos[1] + look_y, self.camera_pos[2] + look_z,
+            0, 1, 0
+        )
 
-def process_input(window):
-    global camera_pos, camera_angle, last_time, modo_camera
-    
-    delta_time = time.time() - last_time
-    last_time = time.time()
-    move_speed = smooth_speed * delta_time
-    
-    if glfw.get_key(window, glfw.KEY_W) == glfw.PRESS and modo_camera == '3D':
-        camera_pos[2] += move_speed
-    if glfw.get_key(window, glfw.KEY_S) == glfw.PRESS and modo_camera == '3D':
-        camera_pos[2] -= move_speed
-    if glfw.get_key(window, glfw.KEY_A) == glfw.PRESS and modo_camera == '3D':
-        camera_pos[0] -= move_speed
-    if glfw.get_key(window, glfw.KEY_D) == glfw.PRESS and modo_camera == '3D':
-        camera_pos[0] += move_speed
-    
-    if glfw.get_key(window, glfw.KEY_LEFT) == glfw.PRESS and modo_camera == '3D':
-        camera_angle -= rotation_speed * delta_time
-    if glfw.get_key(window, glfw.KEY_RIGHT) == glfw.PRESS and modo_camera == '3D':
-        camera_angle += rotation_speed * delta_time
-    
-    if glfw.get_key(window, glfw.KEY_SPACE) == glfw.PRESS:
-        modo_camera = '2D' if modo_camera == '3D' else '3D'
-        configurar_camera()
-        configurar_cenario()
+        self.desenhar_chao()
+        self.desenhar_casa()
+        self.desenhar_nuvem(-1, 2, -2)
+        self.desenhar_nuvem(1.5, 2.5, -3)
 
-def main():
-    window = init_window(800, 800, 'Jogo')
-    if not window:
-        return
-    
-    iniciar_opengl()
-    
-    while not glfw.window_should_close(window):
-        glfw.poll_events()
-        process_input(window)
-        desenhar_cenario()
-        glfw.swap_buffers(window)
-    
-    glfw.terminate()
+    def processar_entrada(self):
+        move_speed = 0.05
 
-if __name__ == '__main__':  
-    main()
+        front_x = math.cos(math.radians(self.yaw))
+        front_z = math.sin(math.radians(self.yaw))
+
+        if glfw.get_key(self.window, glfw.KEY_W) == glfw.PRESS:
+            self.camera_pos[0] += move_speed * front_x
+            self.camera_pos[2] += move_speed * front_z
+        if glfw.get_key(self.window, glfw.KEY_S) == glfw.PRESS:
+            self.camera_pos[0] -= move_speed * front_x
+            self.camera_pos[2] -= move_speed * front_z
+        if glfw.get_key(self.window, glfw.KEY_A) == glfw.PRESS:
+            self.camera_pos[0] -= move_speed * front_z
+            self.camera_pos[2] += move_speed * front_x
+        if glfw.get_key(self.window, glfw.KEY_D) == glfw.PRESS:
+            self.camera_pos[0] += move_speed * front_z
+            self.camera_pos[2] -= move_speed * front_x
+
+    def mouse_callback(self, window, xpos, ypos):
+        if not self.habilitar_movimento_mouse:
+            return
+
+        if self.first_mouse:
+            self.last_x = xpos
+            self.last_y = ypos
+            self.first_mouse = False
+
+        xoffset = (xpos - self.last_x) * self.sensibilidade
+        yoffset = (self.last_y - ypos) * self.sensibilidade  
+
+        self.last_x = xpos
+        self.last_y = ypos
+
+        self.yaw += xoffset
+        self.pitch += yoffset
+
+        self.pitch = max(-89.0, min(89.0, self.pitch))
+
+    def teclado_callback(self, window, key, scancode, action, mods):
+        if key == glfw.KEY_ESCAPE and action == glfw.PRESS:
+            glfw.set_window_should_close(self.window, True)
+
+        if key == glfw.KEY_M and action == glfw.PRESS:
+            self.habilitar_movimento_mouse = not self.habilitar_movimento_mouse
+            print("Movimento do mouse:", "Ativado" if self.habilitar_movimento_mouse else "Desativado")
+
+    def executar(self):
+        if not self.iniciar_janela():
+            return
+
+        self.iniciar_opengl()
+        while not glfw.window_should_close(self.window):
+            glfw.poll_events()
+            self.processar_entrada()
+            self.desenhar_cenario()
+            glfw.swap_buffers(self.window)
+
+        glfw.terminate()
+
+if __name__ == '__main__':
+    jogo = JogoOpenGL()
+    jogo.executar()
