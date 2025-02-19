@@ -2,6 +2,7 @@ from OpenGL.GL import *
 from OpenGL.GLU import *
 import glfw
 import time
+import math 
 
 # Configurações da câmera
 camera_pos = [0, 0, -3]
@@ -60,7 +61,7 @@ def iniciar_opengl():
     configurar_camera()
 
 def desenhar_chao():
-    glColor3f(0.1, 0.7, 0.1)  
+    glColor3f(0.1, 0.7, 0.1)    
     glBegin(GL_QUADS)
     
     if modo_camera == '3D':
@@ -108,6 +109,26 @@ def desenhar_casa():
         
     glEnd() 
 
+def desenhar_nuvem(x, y, z=0):
+    glColor3f(1, 1, 1)
+    glBegin(GL_TRIANGLE_FAN)
+    for i in range(360):
+        angulo = math.radians(i)
+        glVertex3f(x + 0.3 * math.cos(angulo), y + 0.2 * math.sin(angulo), z)
+    glEnd()
+    
+    glBegin(GL_TRIANGLE_FAN)
+    for i in range(360):
+        angulo = math.radians(i)
+        glVertex3f(x + 0.2 * math.cos(angulo) + 0.2, y + 0.2 * math.sin(angulo), z)
+    glEnd()
+    
+    glBegin(GL_TRIANGLE_FAN)
+    for i in range(360):
+        angulo = math.radians(i)
+        glVertex3f(x + 0.2 * math.cos(angulo) - 0.2, y + 0.2 * math.sin(angulo), z)
+    glEnd()
+
 
 def desenhar_cenario():
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
@@ -118,10 +139,17 @@ def desenhar_cenario():
         glRotatef(camera_angle, 0, 1, 0)
         desenhar_chao()
         desenhar_casa()
+        desenhar_nuvem(-1, 2, -2)
+        desenhar_nuvem(1.5, 2.5, -3)
+        
     else:
         glTranslatef(0, -3, 0)
         desenhar_chao()
         desenhar_casa()
+        desenhar_nuvem(-2, 3)
+        desenhar_nuvem(2, 3.5)
+        desenhar_nuvem(-5, 1)
+        desenhar_nuvem(5, 1)
 
 
 def process_input(window):
