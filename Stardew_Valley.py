@@ -103,7 +103,7 @@ class JogoOpenGL:
         if tempo_decorrido < 15:
             cor_dia = (0.6, 0.8, 1.0)  
             cor_noite = (0.1, 0.1, 0.3)  
-            t = tempo_decorrido / 15  # tempo da transição
+            t = tempo_decorrido / 30  # tempo da transição
             cor_sky = self.lerp_color( cor_dia, cor_noite, t)
         else:
             cor_sky = (0.1, 0.1, 0.3)  
