@@ -33,7 +33,7 @@ def configurar_camera():
     if modo_camera == '3D':
         gluPerspective(100, 1.0, 0.1, 100)
     else:
-        glOrtho(-7, 7, -7, 7, -10, 10)  # Aumentado para maior visibilidade
+        glOrtho(-7, 7, -7, 7, -15, 10)  # Aumentado para maior visibilidade
     glMatrixMode(GL_MODELVIEW)
 
 def configurar_cenario():
@@ -51,28 +51,51 @@ def iniciar_opengl():
 def desenhar_chao():
     glColor3f(0.1, 0.7, 0.1)  # Verde
     glBegin(GL_QUADS)
-    glVertex3f(-5, -1, -5)
-    glVertex3f(5, -1, -5)
-    glVertex3f(5, -1, 5)
-    glVertex3f(-5, -1, 5)
+    
+    if modo_camera == '3D':
+        glVertex3f(-5, -1, -5)
+        glVertex3f(5, -1, -5)
+        glVertex3f(5, -1, 5)
+        glVertex3f(-5, -1, 5)
+    else:  # Ajuste para 2D
+        glVertex2f(-7, -7)
+        glVertex2f(7, -7)
+        glVertex2f(7, -3)
+        glVertex2f(-7, -3)
+    
     glEnd()
 
 def desenhar_casa():
     glDisable(GL_LIGHTING)  
     glColor3f(0.8, 0.5, 0.2)  # Marrom para a casa
     glBegin(GL_QUADS)
-    glVertex3f(-0.3, -1, 0.0)
-    glVertex3f(-0.3, -0.6, 0.0)
-    glVertex3f(0.3, -0.6, 0.0)
-    glVertex3f(0.3, -1, 0.0)
+    
+    if modo_camera == '3D':
+        glVertex3f(-0.3, -1, 0.0)
+        glVertex3f(-0.3, -0.6, 0.0)
+        glVertex3f(0.3, -0.6, 0.0)
+        glVertex3f(0.3, -1, 0.0)
+    else:  # Ajuste para 2D
+        glVertex2f(-0.5, -3.0)  # Ajustado para tocar o chão
+        glVertex2f(-0.5, -2.0)  # Mais alto
+        glVertex2f(0.5, -2.0)
+        glVertex2f(0.5, -3.0)
+    
     glEnd()
     
     glColor3f(0.7, 0.1, 0.1)  # Vermelho para o telhado
     glBegin(GL_TRIANGLES)
-    glVertex3f(-0.35, -0.6, 0.0)
-    glVertex3f(0.35, -0.6, 0.0)
-    glVertex3f(0.0, -0.3, 0.0)
-    glEnd()
+    
+    if modo_camera == '3D':
+        glVertex3f(-0.35, -0.6, 0.0)
+        glVertex3f(0.35, -0.6, 0.0)
+        glVertex3f(0.0, -0.3, 0.0)
+    else:  # Ajuste para 2D
+        glVertex2f(-0.55, -2.0)
+        glVertex2f(0.55, -2.0)
+        glVertex2f(0.0, -1.5)  # Topo do telhado
+        
+    glEnd() 
 
 
 def desenhar_cenario():
@@ -82,11 +105,14 @@ def desenhar_cenario():
     if modo_camera == '3D':
         glTranslatef(camera_pos[0], camera_pos[1], camera_pos[2])
         glRotatef(camera_angle, 0, 1, 0)
+        desenhar_chao()
+        desenhar_casa()
     else:
         glTranslatef(0, -3, 0)
+        desenhar_chao()
+        desenhar_casa()
 
-    desenhar_chao()
-    desenhar_casa()
+
 
 
 def process_input(window):
