@@ -135,11 +135,30 @@ class JogoOpenGL:
                 glVertex3f(x + 0.2 * math.cos(angulo) + deslocamento, y + 0.2 * math.sin(angulo), z)
             glEnd()
 
+    def lerp_color(self, cor1, cor2, t):
+        return (
+            cor1[0] + t * (cor2[0] - cor1[0]),
+            cor1[1] + t * (cor2[1] - cor1[1]),
+            cor1[2] + t * (cor2[2] - cor1[2])
+        )
+
     def desenhar_cenario(self):
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
         glLoadIdentity()
 
-        # Configuração da câmera
+        tempo_decorrido = time.time() - self.tempo_inicio
+
+        # transição suave da cor do ceu 
+        if tempo_decorrido < 15:
+            cor_dia = (0.6, 0.8, 1.0)  
+            cor_noite = (0.1, 0.1, 0.3)  
+            t = tempo_decorrido / 30  # tempo da transição
+            cor_sky = self.lerp_color( cor_dia, cor_noite, t)
+        else:
+            cor_sky = (0.1, 0.1, 0.3)  
+
+        glClearColor(cor_sky[0], cor_sky[1], cor_sky[2], 1.0)
+
         look_x = math.cos(math.radians(self.yaw)) * math.cos(math.radians(self.pitch))
         look_y = math.sin(math.radians(self.pitch))
         look_z = math.sin(math.radians(self.yaw)) * math.cos(math.radians(self.pitch))
@@ -155,24 +174,35 @@ class JogoOpenGL:
         self.desenhar_nuvem(-1, 2, -2)
         self.desenhar_nuvem(1.5, 2.5, -3)
 
+
     def processar_entrada(self):
         move_speed = 0.005
 
         front_x = math.cos(math.radians(self.yaw))
         front_z = math.sin(math.radians(self.yaw))
 
+        nova_pos_x = self.camera_pos[0]
+        nova_pos_z = self.camera_pos[2]
+
         if glfw.get_key(self.window, glfw.KEY_W) == glfw.PRESS:
-            self.camera_pos[0] += move_speed * front_x
-            self.camera_pos[2] += move_speed * front_z
+            nova_pos_x += move_speed * front_x
+            nova_pos_z += move_speed * front_z
         if glfw.get_key(self.window, glfw.KEY_S) == glfw.PRESS:
-            self.camera_pos[0] -= move_speed * front_x
-            self.camera_pos[2] -= move_speed * front_z
+            nova_pos_x -= move_speed * front_x
+            nova_pos_z -= move_speed * front_z
         if glfw.get_key(self.window, glfw.KEY_D) == glfw.PRESS:
-            self.camera_pos[0] -= move_speed * front_z
-            self.camera_pos[2] += move_speed * front_x
+            nova_pos_x -= move_speed * front_z
+            nova_pos_z += move_speed * front_x
         if glfw.get_key(self.window, glfw.KEY_A) == glfw.PRESS:
-            self.camera_pos[0] += move_speed * front_z
-            self.camera_pos[2] -= move_speed * front_x
+            nova_pos_x += move_speed * front_z
+            nova_pos_z -= move_speed * front_x
+
+        # Limitar andar dentro do espaço verde
+        limite_min, limite_max = -4.5, 4.5  
+        if limite_min <= nova_pos_x <= limite_max:
+            self.camera_pos[0] = nova_pos_x
+        if limite_min <= nova_pos_z <= limite_max:
+            self.camera_pos[2] = nova_pos_z
 
     def mouse_callback(self, window, xpos, ypos):
         if not self.habilitar_movimento_mouse:
@@ -207,6 +237,8 @@ class JogoOpenGL:
             return
 
         self.iniciar_opengl()
+        self.tempo_inicio = time.time()  # Marca o início do jogo
+
         while not glfw.window_should_close(self.window):
             glfw.poll_events()
             self.processar_entrada()
