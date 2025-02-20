@@ -3,6 +3,7 @@ from OpenGL.GLU import *
 import glfw
 import time
 import math
+import random
 
 class JogoOpenGL:
     def __init__(self, largura=800, altura=800, titulo='Jogo'):
@@ -10,7 +11,8 @@ class JogoOpenGL:
         self.altura = altura
         self.titulo = titulo
         self.window = None
-        self.camera_pos = [0, -0.7, -3]
+        self.player_pos = [0, -0.7, 0]  # Posição do jogador
+        self.camera_pos = [0, 0, 3]  # Câmera começa atrás do jogador
         self.yaw = -90.0 
         self.pitch = 0.0  
         self.sensibilidade = 0.1
@@ -18,7 +20,58 @@ class JogoOpenGL:
         self.last_y = altura // 2
         self.first_mouse = True
         self.modo_camera = '3D'
-        self.habilitar_movimento_mouse = True  
+        self.habilitar_movimento_mouse = True
+        self.camera_distance = 3.0  # Distância da câmera ao jogador
+        self.camera_height = 1.5    # Altura da câmera em relação ao jogador
+        self.galinhas = []  # Lista para armazenar as galinhas
+        self.plantas = []   # Lista para armazenar as plantas
+        self.inicializar_galinhas(5)  # Inicializar 5 galinhas
+        self.inicializar_plantas(10)  # Inicializar 10 plantas
+
+    def lerp_color(self, cor1, cor2, t):
+        """
+        Interpola linearmente entre duas cores.
+        :param cor1: Primeira cor (R, G, B).
+        :param cor2: Segunda cor (R, G, B).
+        :param t: Fator de interpolação (0 a 1).
+        :return: Cor interpolada (R, G, B).
+        """
+        return (
+            cor1[0] + t * (cor2[0] - cor1[0]),
+            cor1[1] + t * (cor2[1] - cor1[1]),
+            cor1[2] + t * (cor2[2] - cor1[2])
+        )
+
+    def inicializar_galinhas(self, quantidade):
+        for _ in range(quantidade):
+            # Posição inicial aleatória dentro do espaço do chão
+            x = random.uniform(-4.5, 4.5)
+            z = random.uniform(-4.5, 4.5)
+            self.galinhas.append({"posicao": [x, -1, z], "direcao": random.uniform(0, 360)})
+
+    def inicializar_plantas(self, quantidade):
+        for _ in range(quantidade):
+            # Posição inicial aleatória dentro do espaço do chão
+            x = random.uniform(-4.5, 4.5)
+            z = random.uniform(-4.5, 4.5)
+            self.plantas.append({"posicao": [x, -1, z]})
+
+    def mover_galinhas(self):
+        for galinha in self.galinhas:
+            # Movimentar a galinha na direção atual
+            velocidade = 0.01
+            galinha["posicao"][0] += velocidade * math.cos(math.radians(galinha["direcao"]))
+            galinha["posicao"][2] += velocidade * math.sin(math.radians(galinha["direcao"]))
+
+            # Verificar limites do mapa
+            if galinha["posicao"][0] < -4.5 or galinha["posicao"][0] > 4.5:
+                galinha["direcao"] = 180 - galinha["direcao"]  # Inverter direção no eixo X
+            if galinha["posicao"][2] < -4.5 or galinha["posicao"][2] > 4.5:
+                galinha["direcao"] = -galinha["direcao"]  # Inverter direção no eixo Z
+
+            # Mudar direção aleatoriamente de vez em quando
+            if random.random() < 0.01:  # 1% de chance de mudar de direção
+                galinha["direcao"] = random.uniform(0, 360)
 
     def iniciar_janela(self):
         if not glfw.init():
@@ -135,23 +188,19 @@ class JogoOpenGL:
                 glVertex3f(x + 0.2 * math.cos(angulo) + deslocamento, y + 0.2 * math.sin(angulo), z)
             glEnd()
 
-    def lerp_color(self, cor1, cor2, t):
-        return (
-            cor1[0] + t * (cor2[0] - cor1[0]),
-            cor1[1] + t * (cor2[1] - cor1[1]),
-            cor1[2] + t * (cor2[2] - cor1[2])
-        )
-
-    def desenhar_cerca(self):
+    def desenhar_cerca(self, x, z):
+        glPushMatrix()
+        glTranslatef(x, -1, z)  # Posicionar a cerca no chão
         glColor3f(0.5, 0.3, 0.1)  # Cor marrom para os postes
         post_positions = [-0.1, 0.1]
-        for x in post_positions:
+        for x_offset in post_positions:
             vertices = [
-                [x - 0.01, -0.2, -0.01], [x + 0.01, -0.2, -0.01], [x + 0.01, 0.1, -0.01], [x - 0.01, 0.1, -0.01],
-                [x - 0.01, -0.2, 0.01], [x + 0.01, -0.2, 0.01], [x + 0.01, 0.1, 0.01], [x - 0.01, 0.1, 0.01]
+                [x_offset - 0.01, -0.2, -0.01], [x_offset + 0.01, -0.2, -0.01], [x_offset + 0.01, 0.1, -0.01], [x_offset - 0.01, 0.1, -0.01],
+                [x_offset - 0.01, -0.2, 0.01], [x_offset + 0.01, -0.2, 0.01], [x_offset + 0.01, 0.1, 0.01], [x_offset - 0.01, 0.1, 0.01]
             ]
             faces = [
-                [0, 1, 2, 3], [4, 5, 6, 7], [0, 1, 5, 4], [2, 3, 7, 6], [0, 3, 7, 4], [1, 2, 6, 5]
+                [0, 1, 2, 3], [4, 5, 6, 7], [0, 1, 5, 4],
+                [2, 3, 7, 6], [0, 3, 7, 4], [1, 2, 6, 5]
             ]
             glBegin(GL_QUADS)
             for face in faces:
@@ -166,81 +215,19 @@ class JogoOpenGL:
                 [-0.1, y_offset - 0.01, 0.01], [0.1, y_offset - 0.01, 0.01], [0.1, y_offset + 0.01, 0.01], [-0.1, y_offset + 0.01, 0.01]
             ]
             faces = [
-                [0, 1, 2, 3], [4, 5, 6, 7], [0, 1, 5, 4], [2, 3, 7, 6], [0, 3, 7, 4], [1, 2, 6, 5]
+                [0, 1, 2, 3], [4, 5, 6, 7], [0, 1, 5, 4],
+                [2, 3, 7, 6], [0, 3, 7, 4], [1, 2, 6, 5]
             ]
             glBegin(GL_QUADS)
             for face in faces:
                 for vertex in face:
                     glVertex3fv(vertices[vertex])
             glEnd()
+        glPopMatrix()
 
-    def desenhar_galinha(self):
-        # Corpo da galinha (paralelepípedo branco)
-        glColor3f(1.0, 1.0, 1.0)
-        body_vertices = [
-            [-0.2, 0.0, -0.2], [0.2, 0.0, -0.2], [0.2, 0.4, -0.2], [-0.2, 0.4, -0.2],
-            [-0.2, 0.0, 0.2], [0.2, 0.0, 0.2], [0.2, 0.4, 0.2], [-0.2, 0.4, 0.2]
-        ]
-        faces = [
-            [0, 1, 2, 3], [4, 5, 6, 7], [0, 1, 5, 4],
-            [2, 3, 7, 6], [1, 2, 6, 5], [0, 3, 7, 4]
-        ]
-        glBegin(GL_QUADS)
-        for f in faces:
-            for vertex in f:
-                glVertex3fv(body_vertices[vertex])
-        glEnd()
-        
-        # Crista da galinha (paralelepípedo vermelho - largura igual à cabeça)
-        glColor3f(1.0, 0.0, 0.0)
-        crest_vertices = [
-            [-0.2, 0.4, -0.05], [0.2, 0.4, -0.05], [0.2, 0.5, -0.05], [-0.2, 0.5, -0.05],
-            [-0.2, 0.4, 0.05], [0.2, 0.4, 0.05], [0.2, 0.5, 0.05], [-0.2, 0.5, 0.05]
-        ]
-        glBegin(GL_QUADS)
-        for f in faces:
-            for vertex in f:
-                glVertex3fv(crest_vertices[vertex])
-        glEnd()
-        
-        # Bico da galinha (paralelepípedo amarelo mais à frente)
-        glColor3f(1.0, 1.0, 0.0)
-        beak_vertices = [
-            [0.1, 0.15, -0.25], [0.2, 0.15, -0.25], [0.2, 0.25, -0.25], [0.1, 0.25, -0.25]
-        ]
-        glBegin(GL_QUADS)
-        for vertex in beak_vertices:
-            glVertex3fv(vertex)
-        glEnd()
-        
-        # Olhos da galinha (pequenos paralelepípedos pretos)
-        glColor3f(0.0, 0.0, 0.0)
-        eye_vertices = [
-            [[-0.1, 0.3, -0.21], [-0.05, 0.3, -0.21], [-0.05, 0.35, -0.21], [-0.1, 0.35, -0.21]],
-            [[0.05, 0.3, -0.21], [0.1, 0.3, -0.21], [0.1, 0.35, -0.21], [0.05, 0.35, -0.21]]
-        ]
-        for eye in eye_vertices:
-            glBegin(GL_QUADS)
-            for vertex in eye:
-                glVertex3fv(vertex)
-            glEnd()
-        
-        # Pernas da galinha (paralelepípedos pretos)
-        glColor3f(0.0, 0.0, 0.0)
-        leg_vertices = [
-            [[-0.1, -0.2, -0.05], [-0.05, -0.2, -0.05], [-0.05, 0.0, -0.05], [-0.1, 0.0, -0.05],
-             [-0.1, -0.2, 0.05], [-0.05, -0.2, 0.05], [-0.05, 0.0, 0.05], [-0.1, 0.0, 0.05]],
-            [[0.05, -0.2, -0.05], [0.1, -0.2, -0.05], [0.1, 0.0, -0.05], [0.05, 0.0, -0.05],
-             [0.05, -0.2, 0.05], [0.1, -0.2, 0.05], [0.1, 0.0, 0.05], [0.05, 0.0, 0.05]]
-        ]
-        for leg in leg_vertices:
-            glBegin(GL_QUADS)
-            for f in faces:
-                for vertex in f:
-                    glVertex3fv(leg[vertex])
-            glEnd()
-
-    def desenhar_planta(self):
+    def desenhar_planta(self, x, z):
+        glPushMatrix()
+        glTranslatef(x, -1, z)  # Posicionar a planta no chão
         # Tronco da planta (cilindro verde)
         glColor3f(0.0, 0.5, 0.0)
         glBegin(GL_QUADS)
@@ -256,8 +243,76 @@ class JogoOpenGL:
         quad = gluNewQuadric()
         gluSphere(quad, 0.1, 16, 16)
         glPopMatrix()
+        glPopMatrix()
+
+    def desenhar_galinha(self, x, z):
+        glPushMatrix()
+        glTranslatef(x, -1, z)  # Posicionar a galinha no chão
+        # Corpo da galinha (paralelepípedo branco)
+        glColor3f(1.0, 1.0, 1.0)
+        body_vertices = [
+            [-0.1, 0.0, -0.1], [0.1, 0.0, -0.1], [0.1, 0.2, -0.1], [-0.1, 0.2, -0.1],
+            [-0.1, 0.0, 0.1], [0.1, 0.0, 0.1], [0.1, 0.2, 0.1], [-0.1, 0.2, 0.1]
+        ]
+        faces = [
+            [0, 1, 2, 3], [4, 5, 6, 7], [0, 1, 5, 4],
+            [2, 3, 7, 6], [1, 2, 6, 5], [0, 3, 7, 4]
+        ]
+        glBegin(GL_QUADS)
+        for f in faces:
+            for vertex in f:
+                glVertex3fv(body_vertices[vertex])
+        glEnd()
         
-    
+        # Crista da galinha (paralelepípedo vermelho - largura igual à cabeça)
+        glColor3f(1.0, 0.0, 0.0)
+        crest_vertices = [
+            [-0.1, 0.2, -0.05], [0.1, 0.2, -0.05], [0.1, 0.25, -0.05], [-0.1, 0.25, -0.05],
+            [-0.1, 0.2, 0.05], [0.1, 0.2, 0.05], [0.1, 0.25, 0.05], [-0.1, 0.25, 0.05]
+        ]
+        glBegin(GL_QUADS)
+        for f in faces:
+            for vertex in f:
+                glVertex3fv(crest_vertices[vertex])
+        glEnd()
+        
+        # Bico da galinha (paralelepípedo amarelo mais à frente)
+        glColor3f(1.0, 1.0, 0.0)
+        beak_vertices = [
+            [0.05, 0.1, -0.15], [0.1, 0.1, -0.15], [0.1, 0.15, -0.15], [0.05, 0.15, -0.15]
+        ]
+        glBegin(GL_QUADS)
+        for vertex in beak_vertices:
+            glVertex3fv(vertex)
+        glEnd()
+        
+        # Olhos da galinha (pequenos paralelepípedos pretos)
+        glColor3f(0.0, 0.0, 0.0)
+        eye_vertices = [
+            [[-0.05, 0.15, -0.11], [-0.025, 0.15, -0.11], [-0.025, 0.175, -0.11], [-0.05, 0.175, -0.11]],
+            [[0.025, 0.15, -0.11], [0.05, 0.15, -0.11], [0.05, 0.175, -0.11], [0.025, 0.175, -0.11]]
+        ]
+        for eye in eye_vertices:
+            glBegin(GL_QUADS)
+            for vertex in eye:
+                glVertex3fv(vertex)
+            glEnd()
+        
+        # Pernas da galinha (paralelepípedos pretos)
+        glColor3f(0.0, 0.0, 0.0)
+        leg_vertices = [
+            [[-0.05, -0.1, -0.05], [-0.025, -0.1, -0.05], [-0.025, 0.0, -0.05], [-0.05, 0.0, -0.05],
+             [-0.05, -0.1, 0.05], [-0.025, -0.1, 0.05], [-0.025, 0.0, 0.05], [-0.05, 0.0, 0.05]],
+            [[0.025, -0.1, -0.05], [0.05, -0.1, -0.05], [0.05, 0.0, -0.05], [0.025, 0.0, -0.05],
+             [0.025, -0.1, 0.05], [0.05, -0.1, 0.05], [0.05, 0.0, 0.05], [0.025, 0.0, 0.05]]
+        ]
+        for leg in leg_vertices:
+            glBegin(GL_QUADS)
+            for f in faces:
+                for vertex in f:
+                    glVertex3fv(leg[vertex])
+            glEnd()
+        glPopMatrix()
 
     def desenhar_cenario(self):
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
@@ -265,58 +320,60 @@ class JogoOpenGL:
 
         tempo_decorrido = time.time() - self.tempo_inicio
 
-        # transição suave da cor do ceu 
+        # Transição suave da cor do céu
         if tempo_decorrido < 15:
-            cor_dia = (0.6, 0.8, 1.0)
+            cor_dia = (0.6, 0.8, 1.0)  
             cor_noite = (0.1, 0.1, 0.3)  
-            t = tempo_decorrido / 30  # tempo da transição
+            t = tempo_decorrido / 30  # Tempo da transição
             cor_sky = self.lerp_color(cor_dia, cor_noite, t)
         else:
             cor_sky = (0.1, 0.1, 0.3)  
 
         glClearColor(cor_sky[0], cor_sky[1], cor_sky[2], 1.0)
 
-        look_x = math.cos(math.radians(self.yaw)) * math.cos(math.radians(self.pitch))
-        look_y = math.sin(math.radians(self.pitch))
-        look_z = math.sin(math.radians(self.yaw)) * math.cos(math.radians(self.pitch))
-
+        # Configurar a câmera para olhar para o jogador
         gluLookAt(
-            self.camera_pos[0], self.camera_pos[1], self.camera_pos[2],
-            self.camera_pos[0] + look_x, self.camera_pos[1] + look_y, self.camera_pos[2] + look_z,
-            0, 1, 0
+            self.camera_pos[0], self.camera_pos[1], self.camera_pos[2],  # Posição da câmera
+            self.player_pos[0], self.player_pos[1] + 1, self.player_pos[2],  # Ponto para onde a câmera olha
+            0, 1, 0  # Vetor UP
         )
 
         self.desenhar_chao()
         self.desenhar_casa()
         self.desenhar_nuvem(-1, 2, -2)
         self.desenhar_nuvem(1.5, 2.5, -3)
-
-        # Desenhar a cerca
+        
+        # Desenhar o personagem na posição do jogador
         glPushMatrix()
-        glTranslatef(-2, -1, -2)  # Posicionar a cerca no cenário
-        self.desenhar_cerca()
+        glTranslatef(self.player_pos[0], self.player_pos[1], self.player_pos[2])
+        glRotatef(self.yaw + 90, 0, 1, 0)
+        self.desenhar_personagem()
         glPopMatrix()
 
-        # Desenhar a galinha
-        glPushMatrix()
-        glTranslatef(1, -1, 1)  # Posicionar a galinha no cenário
-        self.desenhar_galinha()
-        glPopMatrix()
+        # Desenhar cercas ao redor do cenário
+        for x in range(-5, 6, 1):  # Cercas nas bordas x = -5 e x = 5
+            self.desenhar_cerca(x, -5)
+            self.desenhar_cerca(x, 5)
+        for z in range(-5, 6, 1):  # Cercas nas bordas z = -5 e z = 5
+            self.desenhar_cerca(-5, z)
+            self.desenhar_cerca(5, z)
+
+        # Desenhar as galinhas
+        for galinha in self.galinhas:
+            self.desenhar_galinha(galinha["posicao"][0], galinha["posicao"][2])
 
         # Desenhar as plantas
-        glPushMatrix()
-        glTranslatef(2, -1, -1)  # Posicionar a planta no cenário
-        self.desenhar_planta()
-        glPopMatrix()
+        for planta in self.plantas:
+            self.desenhar_planta(planta["posicao"][0], planta["posicao"][2])
 
     def processar_entrada(self):
-        move_speed = 0.005
+        move_speed = 0.05
 
         front_x = math.cos(math.radians(self.yaw))
         front_z = math.sin(math.radians(self.yaw))
 
-        nova_pos_x = self.camera_pos[0]
-        nova_pos_z = self.camera_pos[2]
+        nova_pos_x = self.player_pos[0]
+        nova_pos_z = self.player_pos[2]
 
         if glfw.get_key(self.window, glfw.KEY_W) == glfw.PRESS:
             nova_pos_x += move_speed * front_x
@@ -334,9 +391,11 @@ class JogoOpenGL:
         # Limitar andar dentro do espaço verde
         limite_min, limite_max = -4.5, 4.5  
         if limite_min <= nova_pos_x <= limite_max:
-            self.camera_pos[0] = nova_pos_x
+            self.player_pos[0] = nova_pos_x
         if limite_min <= nova_pos_z <= limite_max:
-            self.camera_pos[2] = nova_pos_z
+            self.player_pos[2] = nova_pos_z
+
+        self.atualizar_camera()
 
     def mouse_callback(self, window, xpos, ypos):
         if not self.habilitar_movimento_mouse:
@@ -366,6 +425,52 @@ class JogoOpenGL:
             self.habilitar_movimento_mouse = not self.habilitar_movimento_mouse
             print("Movimento do mouse:", "Ativado" if self.habilitar_movimento_mouse else "Desativado")
 
+    def atualizar_camera(self):
+        # Calcular a posição da câmera baseada na posição do jogador
+        camera_offset_x = -self.camera_distance * math.cos(math.radians(self.yaw)) * math.cos(math.radians(self.pitch))
+        camera_offset_y = -self.camera_distance * math.sin(math.radians(self.pitch))
+        camera_offset_z = -self.camera_distance * math.sin(math.radians(self.yaw)) * math.cos(math.radians(self.pitch))
+
+        self.camera_pos[0] = self.player_pos[0] + camera_offset_x
+        self.camera_pos[1] = self.player_pos[1] + camera_offset_y + self.camera_height
+        self.camera_pos[2] = self.player_pos[2] + camera_offset_z
+
+    def desenhar_personagem(self):
+        # Corpo (tronco)
+        glColor3f(0.2, 0.4, 0.8)  # Azul para a roupa
+        glPushMatrix()
+        glScalef(0.2, 0.3, 0.1)
+        quad = gluNewQuadric()
+        gluCylinder(quad, 1, 1, 1, 16, 16)
+        glPopMatrix()
+
+        # Cabeça
+        glColor3f(0.8, 0.6, 0.4)  # Cor da pele
+        glPushMatrix()
+        glTranslatef(0, 0.4, 0)
+        quad = gluNewQuadric()
+        gluSphere(quad, 0.1, 16, 16)
+        glPopMatrix()
+
+        # Braços
+        glColor3f(0.2, 0.4, 0.8)  # Azul para a roupa
+        for x in [-0.15, 0.15]:  # Posição dos braços
+            glPushMatrix()
+            glTranslatef(x, 0.2, 0)
+            glRotatef(90, 1, 0, 0)
+            quad = gluNewQuadric()
+            gluCylinder(quad, 0.03, 0.03, 0.2, 8, 8)
+            glPopMatrix()
+
+        # Pernas
+        for x in [-0.07, 0.07]:  # Posição das pernas
+            glPushMatrix()
+            glTranslatef(x, -0.1, 0)
+            glRotatef(90, 1, 0, 0)
+            quad = gluNewQuadric()
+            gluCylinder(quad, 0.04, 0.04, 0.2, 8, 8)
+            glPopMatrix()
+
     def executar(self):
         if not self.iniciar_janela():
             return
@@ -376,6 +481,7 @@ class JogoOpenGL:
         while not glfw.window_should_close(self.window):
             glfw.poll_events()
             self.processar_entrada()
+            self.mover_galinhas()  # Atualizar a posição das galinhas
             self.desenhar_cenario()
             glfw.swap_buffers(self.window)
 
