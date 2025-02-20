@@ -10,7 +10,7 @@ class JogoOpenGL:
         self.altura = altura
         self.titulo = titulo
         self.window = None
-        self.camera_pos = [0, 0, -3]
+        self.camera_pos = [0, -0.7, -3]
         self.yaw = -90.0 
         self.pitch = 0.0  
         self.sensibilidade = 0.1
@@ -24,7 +24,12 @@ class JogoOpenGL:
         if not glfw.init():
             return False
 
-        self.window = glfw.create_window(self.largura, self.altura, self.titulo, None, None)
+        # Obter o monitor principal para o modo de tela cheia
+        monitor = glfw.get_primary_monitor()
+        video_mode = glfw.get_video_mode(monitor)
+
+        # Criar a janela em modo de tela cheia
+        self.window = glfw.create_window(video_mode.size.width, video_mode.size.height, self.titulo, monitor, None)
         if not self.window:
             glfw.terminate()
             return False
@@ -61,21 +66,65 @@ class JogoOpenGL:
         glEnd()
 
     def desenhar_casa(self):
-        glColor3f(0.8, 0.5, 0.2)
+        # Ajustar a altura da casa para o nível do chão
+        glPushMatrix()
+        glTranslatef(0, -1, 0)  # Mover a casa para baixo para alinhar com o chão
+        glRotatef(180, 0, 1, 0)  # Rotacionar a casa 180 graus no eixo Y
+
+        # Corpo da casa
+        glColor3f(0.9, 0.6, 0.3)
+        body_vertices = [
+            [-0.3, 0.0, -0.3], [0.3, 0.0, -0.3], [0.3, 0.4, -0.3], [-0.3, 0.4, -0.3],
+            [-0.3, 0.0, 0.3], [0.3, 0.0, 0.3], [0.3, 0.4, 0.3], [-0.3, 0.4, 0.3]
+        ]
+        faces = [
+            [0, 1, 2, 3], [4, 5, 6, 7], [0, 1, 5, 4],
+            [2, 3, 7, 6], [1, 2, 6, 5], [0, 3, 7, 4]
+        ]
         glBegin(GL_QUADS)
-        glVertex3f(-0.3, -1, 0.0)
-        glVertex3f(-0.3, -0.6, 0.0)
-        glVertex3f(0.3, -0.6, 0.0)
-        glVertex3f(0.3, -1, 0.0)
+        for f in faces:
+            for vertex in f:
+                glVertex3fv(body_vertices[vertex])
+        glEnd()
+        
+        # Telhado
+        glColor3f(0.7, 0.1, 0.1)
+        roof_vertices = [
+            [-0.35, 0.4, -0.35], [0.35, 0.4, -0.35], [0.0, 0.6, 0.0],
+            [-0.35, 0.4, 0.35], [0.35, 0.4, 0.35]
+        ]
+        roof_faces = [
+            [0, 1, 2], [1, 4, 2], [4, 3, 2], [3, 0, 2]
+        ]
+        glBegin(GL_TRIANGLES)
+        for f in roof_faces:
+            for vertex in f:
+                glVertex3fv(roof_vertices[vertex])
         glEnd()
 
-        # Telhado
-        glColor3f(0.5, 0.2, 0.1)
-        glBegin(GL_TRIANGLES)
-        glVertex3f(-0.35, -0.6, 0.0)
-        glVertex3f(0.35, -0.6, 0.0)
-        glVertex3f(0.0, -0.3, 0.0)
+        # Porta
+        glColor3f(0.5, 0.3, 0.1)
+        door_vertices = [
+            [-0.05, 0.0, -0.301], [0.05, 0.0, -0.301], [0.05, 0.15, -0.301], [-0.05, 0.15, -0.301]
+        ]
+        glBegin(GL_QUADS)
+        for vertex in door_vertices:
+            glVertex3fv(vertex)
         glEnd()
+
+        # Janelas
+        glColor3f(0.7, 0.9, 1.0)
+        windows = [
+            [[-0.25, 0.1, -0.301], [-0.15, 0.1, -0.301], [-0.15, 0.2, -0.301], [-0.25, 0.2, -0.301]],
+            [[0.15, 0.1, -0.301], [0.25, 0.1, -0.301], [0.25, 0.2, -0.301], [0.15, 0.2, -0.301]]
+        ]
+        for win in windows:
+            glBegin(GL_QUADS)
+            for vertex in win:
+                glVertex3fv(vertex)
+            glEnd()
+
+        glPopMatrix()  # Restaurar a matriz de transformação anterior
 
     def desenhar_nuvem(self, x, y, z=0):
         glColor3f(1, 1, 1)
@@ -107,7 +156,7 @@ class JogoOpenGL:
         self.desenhar_nuvem(1.5, 2.5, -3)
 
     def processar_entrada(self):
-        move_speed = 0.05
+        move_speed = 0.005
 
         front_x = math.cos(math.radians(self.yaw))
         front_z = math.sin(math.radians(self.yaw))
@@ -118,10 +167,10 @@ class JogoOpenGL:
         if glfw.get_key(self.window, glfw.KEY_S) == glfw.PRESS:
             self.camera_pos[0] -= move_speed * front_x
             self.camera_pos[2] -= move_speed * front_z
-        if glfw.get_key(self.window, glfw.KEY_A) == glfw.PRESS:
+        if glfw.get_key(self.window, glfw.KEY_D) == glfw.PRESS:
             self.camera_pos[0] -= move_speed * front_z
             self.camera_pos[2] += move_speed * front_x
-        if glfw.get_key(self.window, glfw.KEY_D) == glfw.PRESS:
+        if glfw.get_key(self.window, glfw.KEY_A) == glfw.PRESS:
             self.camera_pos[0] += move_speed * front_z
             self.camera_pos[2] -= move_speed * front_x
 
