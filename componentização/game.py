@@ -348,25 +348,115 @@ class JogoOpenGL:
     def draw_monster(self, x, y, z):
         glPushMatrix()
         glTranslatef(x, y, z)
+        glScalef(0.5, 0.5, 0.5)  # Tamanho base do monstro
         
-        # Corpo vermelho grande
-        glColor3f(1.0, 0.0, 0.0)
         quad = gluNewQuadric()
-        gluSphere(quad, 1.0, 16, 16)  # Monstro maior
         
-        # Olhos amarelos
-        glColor3f(1.0, 1.0, 0.0)
-        
-        # Olho esquerdo
+        # Corpo principal (torso)
+        glColor3f(0.1, 0.1, 0.1)  # Preto principal
         glPushMatrix()
-        glTranslatef(-0.3, 0.3, 0.3)
-        gluSphere(quad, 0.2, 8, 8)
+        glScalef(1.0, 1.2, 0.8)
+        gluSphere(quad, 1.0, 16, 16)
         glPopMatrix()
         
-        # Olho direito
+        # Cabeça
         glPushMatrix()
-        glTranslatef(0.3, 0.3, 0.3)
-        gluSphere(quad, 0.2, 8, 8)
-        glPopMatrix()
+        glTranslatef(0, 1.0, 0)
+        glScalef(0.8, 0.8, 0.8)
+        gluSphere(quad, 1.0, 16, 16)
+        
+        # Olhos (brilhantes em contraste com o corpo preto)
+        for lado in [-0.3, 0.3]:
+            glPushMatrix()
+            glTranslatef(lado, 0.2, 0.7)
+            
+            # Globo ocular (branco)
+            glColor3f(0.9, 0.9, 0.9)
+            gluSphere(quad, 0.25, 12, 12)
+            
+            # Íris (vermelho intenso)
+            glColor3f(1.0, 0.0, 0.0)
+            glTranslatef(0, 0, 0.15)
+            gluSphere(quad, 0.15, 8, 8)
+            
+            # Pupila (preta)
+            glColor3f(0.0, 0.0, 0.0)
+            glTranslatef(0, 0, 0.05)
+            gluSphere(quad, 0.08, 8, 8)
+            
+            glPopMatrix()
+        
+        # Presas (branco marfim)
+        glColor3f(0.95, 0.95, 0.95)
+        for lado in [-0.2, 0.2]:
+            glPushMatrix()
+            glTranslatef(lado, -0.2, 0.7)
+            glRotatef(45, 1, 0, 0)
+            gluCylinder(quad, 0.08, 0.0, 0.3, 8, 1)
+            glPopMatrix()
+        
+        glPopMatrix()  # Fim da cabeça
+        
+        # Braços
+        glColor3f(0.15, 0.15, 0.15)  # Preto um pouco mais claro para contraste
+        for lado in [-1, 1]:
+            glPushMatrix()
+            glTranslatef(lado * 0.8, 0.3, 0)
+            
+            # Ombro
+            gluSphere(quad, 0.3, 12, 12)
+            
+            # Braço superior
+            glRotatef(lado * 20, 0, 0, 1)
+            glRotatef(30, 1, 0, 0)
+            gluCylinder(quad, 0.2, 0.15, 0.8, 12, 1)
+            
+            # Cotovelo
+            glTranslatef(0, 0, 0.8)
+            gluSphere(quad, 0.2, 12, 12)
+            
+            # Antebraço
+            glRotatef(30, 1, 0, 0)
+            gluCylinder(quad, 0.15, 0.1, 0.6, 12, 1)
+            
+            # Mão
+            glTranslatef(0, 0, 0.6)
+            gluSphere(quad, 0.2, 12, 12)
+            
+            glPopMatrix()
+        
+        # Pernas
+        for lado in [-1, 1]:
+            glPushMatrix()
+            glTranslatef(lado * 0.4, -1.0, 0)
+            
+            # Coxa
+            glColor3f(0.15, 0.15, 0.15)
+            glRotatef(lado * 10, 0, 0, 1)
+            gluCylinder(quad, 0.25, 0.2, 0.8, 12, 1)
+            
+            # Joelho
+            glTranslatef(0, 0, 0.8)
+            gluSphere(quad, 0.25, 12, 12)
+            
+            # Canela
+            glRotatef(10, 1, 0, 0)
+            gluCylinder(quad, 0.2, 0.15, 0.7, 12, 1)
+            
+            # Pé
+            glTranslatef(0, 0, 0.7)
+            glScalef(1.0, 1.0, 1.5)
+            gluSphere(quad, 0.2, 12, 12)
+            
+            glPopMatrix()
+        
+        # Detalhes do corpo (manchas em preto mais escuro)
+        glColor3f(0.05, 0.05, 0.05)  # Preto mais escuro para as manchas
+        for pos in [(0.5, 0.5, 0.3), (-0.5, 0.3, 0.4), (0.3, -0.4, 0.5), (-0.4, -0.2, 0.3)]:
+            glPushMatrix()
+            glTranslatef(*pos)
+            glScalef(0.2, 0.2, 0.1)
+            gluSphere(quad, 1.0, 8, 8)
+            glPopMatrix()
         
         glPopMatrix()
