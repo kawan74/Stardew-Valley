@@ -48,7 +48,7 @@ class Player:
         gluCylinder(quad, 1, 1, 1, 16, 16)
         glPopMatrix()
 
-        # Cabeça
+        # Cabeça        
         glColor3f(0.8, 0.6, 0.4)
         glPushMatrix()
         glTranslatef(0, 0.4, 0)
