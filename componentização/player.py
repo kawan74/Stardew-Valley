@@ -29,11 +29,23 @@ class Player:
             nova_pos_x += self.speed * front_z
             nova_pos_z -= self.speed * front_x
 
+        # Limites do mundo
         limite_min, limite_max = -4.5, 4.5
-        if limite_min <= nova_pos_x <= limite_max:
-            self.pos[0] = nova_pos_x
-        if limite_min <= nova_pos_z <= limite_max:
-            self.pos[2] = nova_pos_z
+
+        # Limites da casa
+        house_pos = [0.0, -1.0, 2.0]
+        house_scale = 3.0
+        house_min_x = house_pos[0] - 0.3 * house_scale
+        house_max_x = house_pos[0] + 0.3 * house_scale
+        house_min_z = house_pos[2] - 0.3 * house_scale
+        house_max_z = house_pos[2] + 0.3 * house_scale
+
+        # Verificação de colisão com a casa
+        if not (house_min_x <= nova_pos_x <= house_max_x and house_min_z <= nova_pos_z <= house_max_z):
+            if limite_min <= nova_pos_x <= limite_max:
+                self.pos[0] = nova_pos_x
+            if limite_min <= nova_pos_z <= limite_max:
+                self.pos[2] = nova_pos_z
 
     def draw(self):
         glPushMatrix()
