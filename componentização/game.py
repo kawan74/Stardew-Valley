@@ -22,12 +22,16 @@ class JogoOpenGL:
         self.world = World()
         self.entities = Entities()
         
-        self.tempo_inicio = None
+        self.tempo_inicio = time.time()
         self.first_mouse = True
         self.last_x = largura // 2
         self.last_y = altura // 2
         self.habilitar_movimento_mouse = True
         self.plantas = []  # Lista para armazenar as plantas
+        self.monsters = []
+        self.last_monster_spawn = 0
+        self.monster_spawn_interval = 1  # Spawn mais frequente
+        self.dia_duracao = 20  # 20 segundos por dia (10 dia + 10 noite)
 
     def iniciar_janela(self):
         if not glfw.init():
@@ -64,6 +68,19 @@ class JogoOpenGL:
         self.camera.update()
 
     def desenhar_cenario(self):
+        tempo_atual = time.time() - self.tempo_inicio
+        horas = (tempo_atual % self.dia_duracao) * 24 / self.dia_duracao
+        
+        # Debug da hora
+        print(f"Hora atual: {horas:.1f}, Monstros: {len(self.monsters)}")
+        
+        # Definir se é dia ou noite
+        if horas >= 18 or horas < 6:  # Noite
+            glClearColor(0.1, 0.1, 0.3, 1.0)  # Céu escuro
+            self.spawn_monster()  # Tenta criar monstro
+        else:  # Dia
+            glClearColor(0.5, 0.7, 1.0, 1.0)  # Céu claro
+        
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
         glLoadIdentity()
 
@@ -83,6 +100,11 @@ class JogoOpenGL:
                 self.draw_tomate(planta['x'], planta['z'])
             else:  # tipo == 'flor'
                 self.draw_planta(planta['x'], planta['z'])
+
+        # Desenhar monstros
+        for monster in self.monsters:
+            self.draw_monster(monster['x'], monster['y'], monster['z'])
+            self.update_monster_position(monster)
 
     def executar(self):
         if not self.iniciar_janela():
@@ -285,3 +307,66 @@ class JogoOpenGL:
 
         finally:
             glPopMatrix()
+
+    def spawn_monster(self):
+        tempo_atual = time.time() - self.tempo_inicio
+        
+        if tempo_atual - self.last_monster_spawn > self.monster_spawn_interval:
+            # Posição aleatória em volta do jogador
+            angulo = random.uniform(0, 2 * math.pi)
+            distancia = 8  # Distância fixa do jogador
+            
+            x = self.player.pos[0] + distancia * math.cos(angulo)
+            z = self.player.pos[2] + distancia * math.sin(angulo)
+            
+            novo_monstro = {
+                'x': x,
+                'y': 0,
+                'z': z,
+                'speed': 0.1  # Velocidade aumentada
+            }
+            
+            self.monsters.append(novo_monstro)
+            self.last_monster_spawn = tempo_atual
+            print(f"Monstro criado em ({x:.1f}, {z:.1f})")
+
+    def update_monster_position(self, monster):
+        # Mover em direção ao jogador
+        dx = self.player.pos[0] - monster['x']
+        dz = self.player.pos[2] - monster['z']
+        distancia = math.sqrt(dx*dx + dz*dz)
+        
+        if distancia > 0.5:  # Se não está muito perto
+            monster['x'] += (dx/distancia) * monster['speed']
+            monster['z'] += (dz/distancia) * monster['speed']
+        
+        # Remover monstro se encostar no jogador
+        if distancia < 1.0:
+            self.monsters.remove(monster)
+            print("Monstro removido")
+
+    def draw_monster(self, x, y, z):
+        glPushMatrix()
+        glTranslatef(x, y, z)
+        
+        # Corpo vermelho grande
+        glColor3f(1.0, 0.0, 0.0)
+        quad = gluNewQuadric()
+        gluSphere(quad, 1.0, 16, 16)  # Monstro maior
+        
+        # Olhos amarelos
+        glColor3f(1.0, 1.0, 0.0)
+        
+        # Olho esquerdo
+        glPushMatrix()
+        glTranslatef(-0.3, 0.3, 0.3)
+        gluSphere(quad, 0.2, 8, 8)
+        glPopMatrix()
+        
+        # Olho direito
+        glPushMatrix()
+        glTranslatef(0.3, 0.3, 0.3)
+        gluSphere(quad, 0.2, 8, 8)
+        glPopMatrix()
+        
+        glPopMatrix()
