@@ -59,6 +59,7 @@ class Entities:
         
         # Cabeça
         glPushMatrix()
+        glRotatef(90, 0, 1, 0)
         glTranslatef(0.1, 0.1, 0)
         gluSphere(quad, 0.08, 8, 8)
         glPopMatrix()
@@ -107,3 +108,4 @@ class Entities:
             glPopMatrix()
         
         glPopMatrix()
+        

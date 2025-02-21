@@ -46,52 +46,68 @@ class World:
         glEnd()
 
     def draw_house(self):
+        glPushMatrix()
+        # Translação para mover a casa para o final do cenário e rente ao chão
+        glTranslatef(0, -1, -4.5)
+        # Rotação de 180 graus no eixo Y
+        glRotatef(180, 0, 1, 0)
+        # Escala para aumentar o tamanho da casa
+        glScalef(3.0, 3.0, 3.0)
+        
         # Parede frontal
-        glColor3f(0.8, 0.6, 0.4)  # Marrom claro
+        glColor3f(0.9, 0.6, 0.3)
+        body_vertices = [
+            [-0.3, 0.0, -0.3], [0.3, 0.0, -0.3], [0.3, 0.4, -0.3], [-0.3, 0.4, -0.3],
+            [-0.3, 0.0, 0.3], [0.3, 0.0, 0.3], [0.3, 0.4, 0.3], [-0.3, 0.4, 0.3]
+        ]
+        faces = [
+            [0, 1, 2, 3], [4, 5, 6, 7], [0, 1, 5, 4],
+            [2, 3, 7, 6], [1, 2, 6, 5], [0, 3, 7, 4]
+        ]
         glBegin(GL_QUADS)
-        glVertex3f(-1.5, -1, -2)
-        glVertex3f(1.5, -1, -2)
-        glVertex3f(1.5, 1, -2)
-        glVertex3f(-1.5, 1, -2)
+        for f in faces:
+            for vertex in f:
+                glVertex3fv(body_vertices[vertex])
         glEnd()
-
+        
         # Telhado
-        glColor3f(0.5, 0.2, 0.0)  # Marrom escuro
+        glColor3f(0.7, 0.1, 0.1)
+        roof_vertices = [
+            [-0.35, 0.4, -0.35], [0.35, 0.4, -0.35], [0.0, 0.6, 0.0],
+            [-0.35, 0.4, 0.35], [0.35, 0.4, 0.35]
+        ]
+        roof_faces = [
+            [0, 1, 2], [1, 4, 2], [4, 3, 2], [3, 0, 2]
+        ]
         glBegin(GL_TRIANGLES)
-        glVertex3f(-1.7, 1, -1.8)
-        glVertex3f(1.7, 1, -1.8)
-        glVertex3f(0, 2, -2)
+        for f in roof_faces:
+            for vertex in f:
+                glVertex3fv(roof_vertices[vertex])
         glEnd()
 
         # Porta
-        glColor3f(0.4, 0.2, 0.0)  # Marrom mais escuro
+        glColor3f(0.5, 0.3, 0.1)
+        door_vertices = [
+            [-0.05, 0.0, -0.301], [0.05, 0.0, -0.301], [0.05, 0.15, -0.301], [-0.05, 0.15, -0.301]
+        ]
         glBegin(GL_QUADS)
-        glVertex3f(-0.3, -1, -1.99)
-        glVertex3f(0.3, -1, -1.99)
-        glVertex3f(0.3, 0.3, -1.99)
-        glVertex3f(-0.3, 0.3, -1.99)
+        for vertex in door_vertices:
+            glVertex3fv(vertex)
         glEnd()
 
-        # Janela
-        glColor3f(0.8, 0.8, 1.0)  # Azul claro
-        glBegin(GL_QUADS)
-        glVertex3f(0.6, 0, -1.99)
-        glVertex3f(1.1, 0, -1.99)
-        glVertex3f(1.1, 0.5, -1.99)
-        glVertex3f(0.6, 0.5, -1.99)
-        glEnd()
-
-        # Grade da janela
-        glColor3f(0.4, 0.2, 0.0)
-        glLineWidth(2.0)
-        glBegin(GL_LINES)
-        # Linha vertical
-        glVertex3f(0.85, 0, -1.98)
-        glVertex3f(0.85, 0.5, -1.98)
-        # Linha horizontal
-        glVertex3f(0.6, 0.25, -1.98)
-        glVertex3f(1.1, 0.25, -1.98)
-        glEnd()
+        # Janelas
+        glColor3f(0.7, 0.9, 1.0)
+        windows = [
+            [[-0.25, 0.1, -0.301], [-0.15, 0.1, -0.301], [-0.15, 0.2, -0.301], [-0.25, 0.2, -0.301]],
+            [[0.15, 0.1, -0.301], [0.25, 0.1, -0.301], [0.25, 0.2, -0.301], [0.15, 0.2, -0.301]]
+        ]
+        for win in windows:
+            glBegin(GL_QUADS)
+            for vertex in win:
+                glVertex3fv(vertex)
+            glEnd()
+        
+        glPopMatrix()
 
     def draw_clouds(self):
         def draw_single_cloud(x, y, z):
