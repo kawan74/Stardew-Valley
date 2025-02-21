@@ -43,30 +43,42 @@ class World:
             return 0
 
         try:
-            imagem = Image.open(caminho_imagem)
+            image = Image.open(caminho_imagem).transpose(Image.FLIP_TOP_BOTTOM)
         except Exception as erro:
             print(f"Erro ao carregar a imagem '{caminho_imagem}': {erro}")
             return 0
 
-        imagem = imagem.transpose(Image.FLIP_TOP_BOTTOM)
-        imagem = imagem.convert("RGBA")
-        largura, altura = imagem.size
-        dados_imagem = imagem.tobytes()
+        width, height = image.size
+        data = image.convert('RGBA').tobytes()
 
-        id_textura = glGenTextures(1)
-        glBindTexture(GL_TEXTURE_2D, id_textura)
+        tex = glGenTextures(1)
+        glBindTexture(GL_TEXTURE_2D, tex)
 
-        glPixelStorei(GL_UNPACK_ALIGNMENT, 1)
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, largura, altura, 0, GL_RGBA, GL_UNSIGNED_BYTE, dados_imagem)
-        
-        glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR)
-        glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR)
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR)
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR)
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT)
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT)
-
+        
+        glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_COMBINE)
+        
+        glTexImage2D(
+            GL_TEXTURE_2D, 
+            0, 
+            GL_RGBA, 
+            width, 
+            height, 
+            0, 
+            GL_RGBA, 
+            GL_UNSIGNED_BYTE, 
+            data
+        )
+        
+        glGenerateMipmap(GL_TEXTURE_2D)
+        
         glBindTexture(GL_TEXTURE_2D, 0)
         print(f"Textura carregada com sucesso: {caminho_imagem}")
-        return id_textura
+        return tex
+        
 
     def init_gl(self):
         glEnable(GL_DEPTH_TEST)
@@ -85,18 +97,18 @@ class World:
         if self.ground_texture:
             glEnable(GL_TEXTURE_2D)
             glBindTexture(GL_TEXTURE_2D, self.ground_texture)
-            print("Textura do chão vinculada.")
 
-        glColor3f(1.0, 1.0, 1.0)
-        glBegin(GL_QUADS)
-        glTexCoord2f(0.0, 0.0); glVertex3f(-5, -1, -5)
-        glTexCoord2f(10.0, 0.0); glVertex3f(5, -1, -5)
-        glTexCoord2f(10.0, 10.0); glVertex3f(5, -1, 5)
-        glTexCoord2f(0.0, 10.0); glVertex3f(-5, -1, 5)
-        glEnd()
+            glBegin(GL_QUADS)
+            glTexCoord2f(0.0, 0.0); glVertex3f(-5, -1, -5)  # Canto inferior esquerdo
+            glTexCoord2f(1.0, 0.0); glVertex3f(5, -1, -5)   # Canto inferior direito
+            glTexCoord2f(1.0, 1.0); glVertex3f(5, -1, 5)    # Canto superior direito
+            glTexCoord2f(0.0, 1.0); glVertex3f(-5, -1, 5)   # Canto superior esquerdo
+            glEnd()
 
-        if self.ground_texture:
+            glBindTexture(GL_TEXTURE_2D, 0)
             glDisable(GL_TEXTURE_2D)
+        else:
+            print("Textura do chão não carregada, não é possível desenhar o chão.")
 
     def draw_house(self):
         glPushMatrix()
@@ -292,3 +304,5 @@ class JogoOpenGL:
 if __name__ == "__main__":
     jogo = JogoOpenGL()
     jogo.executar()
+    
+    
