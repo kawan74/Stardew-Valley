@@ -132,39 +132,58 @@ class World:
         draw_single_cloud(-2, 2.2, -4)
 
     def draw_fences(self):
-        glColor3f(0.6, 0.3, 0.0)  # Marrom para a cerca
-        
-        # Desenha cercas ao redor da área do jogo
-        for x in range(-5, 6, 1):
-            # Cerca frontal
-            self.draw_fence_post(x, -1, -5)
-            # Cerca traseira
-            self.draw_fence_post(x, -1, 5)
-            
-        for z in range(-5, 6, 1):
-            # Cerca lateral esquerda
-            self.draw_fence_post(-5, -1, z)
-            # Cerca lateral direita
-            self.draw_fence_post(5, -1, z)
+        # Desenhar cercas horizontais (frontal e traseira)
+        for x in range(-5, 6):  # Ajuste o range para aumentar a quantidade de cercas
+            self.draw_fence_post(x, -1, -5, vertical=False)  # Cerca frontal
+            self.draw_fence_post(x, -1, 5, vertical=False)   # Cerca traseira
 
-    def draw_fence_post(self, x, y, z):
+        # Desenhar cercas laterais (esquerda e direita)
+        for z in range(-5, 6):  # Ajuste o range para aumentar a quantidade de cercas
+            glPushMatrix()
+            glTranslatef(-5, -1, z)
+            glRotatef(90, 0, 1, 0)  # Rotaciona 90 graus no eixo Y
+            self.draw_fence_post(0, 0, 0, vertical=False)  # Cerca lateral esquerda
+            glPopMatrix()
+
+            glPushMatrix()
+            glTranslatef(5, -1, z)
+            glRotatef(90, 0, 1, 0)  # Rotaciona 90 graus no eixo Y
+            self.draw_fence_post(0, 0, 0, vertical=False)  # Cerca lateral direita
+            glPopMatrix()
+
+    def draw_fence_post(self, x, y, z, vertical=False):
         glPushMatrix()
-        glTranslatef(x, y, z)
+        glTranslatef(x, y, z)  # Ajuste para deixar rente ao chão
         
-        # Poste vertical
-        glPushMatrix()
-        glScalef(0.1, 1.0, 0.1)
-        quad = gluNewQuadric()
-        gluCylinder(quad, 0.5, 0.5, 1, 8, 1)
-        glPopMatrix()
-        
-        # Travessa horizontal
-        glPushMatrix()
-        glTranslatef(0, 0.3, 0)
-        glRotatef(90, 0, 1, 0)
-        glScalef(0.1, 0.1, 1.0)
-        quad = gluNewQuadric()
-        gluCylinder(quad, 0.5, 0.5, 1, 8, 1)
-        glPopMatrix()
+        glColor3f(0.5, 0.3, 0.1)  # Cor marrom para os postes
+        post_positions = [-0.1, 0.1]
+        for x in post_positions:
+            vertices = [
+                [x - 0.01, 0.0, -0.01], [x + 0.01, 0.0, -0.01], [x + 0.01, 0.3, -0.01], [x - 0.01, 0.3, -0.01],
+                [x - 0.01, 0.0, 0.01], [x + 0.01, 0.0, 0.01], [x + 0.01, 0.3, 0.01], [x - 0.01, 0.3, 0.01]
+            ]
+            faces = [
+                [0, 1, 2, 3], [4, 5, 6, 7], [0, 1, 5, 4], [2, 3, 7, 6], [0, 3, 7, 4], [1, 2, 6, 5]
+            ]
+            glBegin(GL_QUADS)
+            for face in faces:
+                for vertex in face:
+                    glVertex3fv(vertices[vertex])
+            glEnd()
+
+        glColor3f(0.6, 0.4, 0.2)  # Cor mais clara para as barras
+        for y_offset in [0.1, 0.2]:
+            vertices = [
+                [-0.1, y_offset - 0.01, -0.01], [0.1, y_offset - 0.01, -0.01], [0.1, y_offset + 0.01, -0.01], [-0.1, y_offset + 0.01, -0.01],
+                [-0.1, y_offset - 0.01, 0.01], [0.1, y_offset - 0.01, 0.01], [0.1, y_offset + 0.01, 0.01], [-0.1, y_offset + 0.01, 0.01]
+            ]
+            faces = [
+                [0, 1, 2, 3], [4, 5, 6, 7], [0, 1, 5, 4], [2, 3, 7, 6], [0, 3, 7, 4], [1, 2, 6, 5]
+            ]
+            glBegin(GL_QUADS)
+            for face in faces:
+                for vertex in face:
+                    glVertex3fv(vertices[vertex])
+            glEnd()
         
         glPopMatrix()
