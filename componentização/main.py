@@ -1,5 +1,5 @@
-from jogo import JogoOpenGL
+from game import JogoOpenGL
 
 if __name__ == '__main__':
     jogo = JogoOpenGL()
-    jogo.executar() 
+    jogo.executar()
