@@ -16,16 +16,16 @@ class Player:
         nova_pos_x = self.pos[0]
         nova_pos_z = self.pos[2]
 
-        if glfw.get_key(window, glfw.KEY_W) == glfw.PRESS:
+        if glfw.get_key(window, glfw.KEY_D) == glfw.PRESS:
             nova_pos_x += self.speed * front_x
             nova_pos_z += self.speed * front_z
-        if glfw.get_key(window, glfw.KEY_S) == glfw.PRESS:
+        if glfw.get_key(window, glfw.KEY_A) == glfw.PRESS:
             nova_pos_x -= self.speed * front_x
             nova_pos_z -= self.speed * front_z
-        if glfw.get_key(window, glfw.KEY_D) == glfw.PRESS:
+        if glfw.get_key(window, glfw.KEY_S) == glfw.PRESS:
             nova_pos_x -= self.speed * front_z
             nova_pos_z += self.speed * front_x
-        if glfw.get_key(window, glfw.KEY_A) == glfw.PRESS:
+        if glfw.get_key(window, glfw.KEY_W) == glfw.PRESS:
             nova_pos_x += self.speed * front_z
             nova_pos_z -= self.speed * front_x
 
@@ -37,8 +37,8 @@ class Player:
 
     def draw(self):
         glPushMatrix()
-        glTranslatef(self.pos[0], self.pos[1], self.pos[2])
-        glRotatef(self.rotation[1] + 90, 0, 1, 0)
+        glTranslatef(self.pos[0], self.pos[1]-0.5, self.pos[2])
+        glRotatef(180, 0, 1, 0)
         
         # Corpo
         glColor3f(0.2, 0.4, 0.8)
@@ -48,7 +48,7 @@ class Player:
         gluCylinder(quad, 1, 1, 1, 16, 16)
         glPopMatrix()
 
-        # Cabeça        
+        # Cabeça
         glColor3f(0.8, 0.6, 0.4)
         glPushMatrix()
         glTranslatef(0, 0.4, 0)
