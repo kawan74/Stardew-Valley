@@ -4,6 +4,7 @@ from OpenGL.GLU import *
 class World:
     def __init__(self):
         self.sky_color = (0.6, 0.8, 1.0)
+        self.house_pos = [0.0, -1.0, 2.0]  # Abaixando mais a casa para Y = -1.0
 
     def lerp_color(self, cor1, cor2, t):
         return (
@@ -48,7 +49,7 @@ class World:
     def draw_house(self):
         glPushMatrix()
         # Translação para mover a casa para o final do cenário e rente ao chão
-        glTranslatef(0, -1, -4.5)
+        glTranslatef(self.house_pos[0], self.house_pos[1], self.house_pos[2])
         # Rotação de 180 graus no eixo Y
         glRotatef(180, 0, 1, 0)
         # Escala para aumentar o tamanho da casa

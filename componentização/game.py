@@ -74,7 +74,7 @@ class JogoOpenGL:
         
         # Desenhar elementos do mundo
         self.world.draw()
-        self.draw_player()
+        self.player.draw()
         self.entities.draw()
 
         # Desenhar todas as plantas
