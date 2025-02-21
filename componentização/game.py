@@ -74,7 +74,7 @@ class JogoOpenGL:
         
         # Desenhar elementos do mundo
         self.world.draw()
-        self.player.draw()
+        self.draw_player()
         self.entities.draw()
 
         # Desenhar todas as plantas
@@ -216,3 +216,72 @@ class JogoOpenGL:
         glPopMatrix()
         
         glPopMatrix()
+
+    def draw_player(self):
+        glPushMatrix()
+        try:
+            glTranslatef(self.player.pos[0], self.player.pos[1] + 0.5, self.player.pos[2])  # Levantei um pouco o boneco
+            glRotatef(self.player.rotation[1], 0, 1, 0)
+            glScalef(1.5, 1.5, 1.5)  # Aumentei o tamanho geral do boneco
+            
+            quad = gluNewQuadric()
+            
+            # Corpo (tronco) - mais largo
+            glColor3f(0.2, 0.4, 0.8)  # Azul mais vivo
+            glPushMatrix()
+            glScalef(0.4, 0.5, 0.3)
+            gluCylinder(quad, 1.0, 0.8, 1.0, 16, 16)  # Usando cilindro para o corpo
+            glPopMatrix()
+
+            # Cabeça - maior e mais redonda
+            glColor3f(0.95, 0.75, 0.6)  # Cor de pele
+            glPushMatrix()
+            glTranslatef(0, 0.8, 0)
+            glScalef(0.4, 0.4, 0.4)
+            gluSphere(quad, 1.0, 16, 16)
+            glPopMatrix()
+
+            # Cabelo - mais volumoso
+            glColor3f(0.3, 0.2, 0.1)  # Castanho
+            glPushMatrix()
+            glTranslatef(0, 0.9, 0)
+            glScalef(0.42, 0.2, 0.42)
+            gluSphere(quad, 1.0, 16, 16)
+            glPopMatrix()
+
+            # Braços - mais grossos e curtos
+            glColor3f(0.2, 0.4, 0.8)  # Azul
+            # Braço esquerdo
+            glPushMatrix()
+            glTranslatef(-0.5, 0.3, 0)
+            glRotatef(20, 0, 0, 1)
+            glScalef(0.15, 0.4, 0.15)
+            gluCylinder(quad, 1.0, 0.8, 1.0, 12, 12)
+            glPopMatrix()
+            
+            # Braço direito
+            glPushMatrix()
+            glTranslatef(0.5, 0.3, 0)
+            glRotatef(-20, 0, 0, 1)
+            glScalef(0.15, 0.4, 0.15)
+            gluCylinder(quad, 1.0, 0.8, 1.0, 12, 12)
+            glPopMatrix()
+
+            # Pernas - mais grossas
+            glColor3f(0.2, 0.2, 0.7)  # Azul escuro
+            # Perna esquerda
+            glPushMatrix()
+            glTranslatef(-0.2, -0.5, 0)
+            glScalef(0.18, 0.5, 0.18)
+            gluCylinder(quad, 1.0, 0.8, 1.0, 12, 12)
+            glPopMatrix()
+            
+            # Perna direita
+            glPushMatrix()
+            glTranslatef(0.2, -0.5, 0)
+            glScalef(0.18, 0.5, 0.18)
+            gluCylinder(quad, 1.0, 0.8, 1.0, 12, 12)
+            glPopMatrix()
+
+        finally:
+            glPopMatrix()
