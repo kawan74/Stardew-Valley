@@ -349,24 +349,27 @@ class JogoOpenGL:
         glPushMatrix()
         glTranslatef(x, y, z)
         
-        # Corpo vermelho grande
-        glColor3f(1.0, 0.0, 0.0)
+        # Corpo da abóbora (laranja)
+        glColor3f(1.0, 0.5, 0.0)
         quad = gluNewQuadric()
-        gluSphere(quad, 1.0, 16, 16)  # Monstro maior
-        
-        # Olhos amarelos
-        glColor3f(1.0, 1.0, 0.0)
-        
-        # Olho esquerdo
+        gluSphere(quad, 0.3, 16, 16)  # Abóbora menor
+
+        # Detalhes da abóbora (linhas verticais)
+        glColor3f(0.8, 0.4, 0.0)
+        for angle in range(0, 360, 30):
+            glPushMatrix()
+            glRotatef(angle, 0, 1, 0)
+            glTranslatef(0.0, 0.0, 0.15)  # Ajuste para o tamanho menor
+            glScalef(0.03, 0.3, 0.03)  # Ajuste para o tamanho menor
+            gluSphere(quad, 1.0, 8, 8)
+            glPopMatrix()
+
+        # Talo da abóbora (verde)
+        glColor3f(0.0, 0.5, 0.0)
         glPushMatrix()
-        glTranslatef(-0.3, 0.3, 0.3)
-        gluSphere(quad, 0.2, 8, 8)
+        glTranslatef(0.0, 0.3, 0.0)  # Ajuste para o tamanho menor
+        glRotatef(-90, 1, 0, 0)
+        gluCylinder(quad, 0.03, 0.01, 0.1, 8, 8)  # Ajuste para o tamanho menor
         glPopMatrix()
-        
-        # Olho direito
-        glPushMatrix()
-        glTranslatef(0.3, 0.3, 0.3)
-        gluSphere(quad, 0.2, 8, 8)
-        glPopMatrix()
-        
+
         glPopMatrix()
