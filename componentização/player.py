@@ -40,12 +40,42 @@ class Player:
         glTranslatef(self.pos[0], self.pos[1]-0.5, self.pos[2])
         glRotatef(180, 0, 1, 0)
         
-        # Corpo
+        # Corpo retangular mais fino
         glColor3f(0.2, 0.4, 0.8)
         glPushMatrix()
-        glScalef(0.2, 0.3, 0.1)
-        quad = gluNewQuadric()
-        gluCylinder(quad, 1, 1, 1, 16, 16)
+        glScalef(0.1, 0.3, 0.05)  # Ajuste para um corpo mais fino
+        glBegin(GL_QUADS)
+        # Frente
+        glVertex3f(-1, -1, 1)
+        glVertex3f(1, -1, 1)
+        glVertex3f(1, 1, 1)
+        glVertex3f(-1, 1, 1)
+        # Trás
+        glVertex3f(-1, -1, -1)
+        glVertex3f(1, -1, -1)
+        glVertex3f(1, 1, -1)
+        glVertex3f(-1, 1, -1)
+        # Esquerda
+        glVertex3f(-1, -1, -1)
+        glVertex3f(-1, -1, 1)
+        glVertex3f(-1, 1, 1)
+        glVertex3f(-1, 1, -1)
+        # Direita
+        glVertex3f(1, -1, -1)
+        glVertex3f(1, -1, 1)
+        glVertex3f(1, 1, 1)
+        glVertex3f(1, 1, -1)
+        # Topo
+        glVertex3f(-1, 1, -1)
+        glVertex3f(1, 1, -1)
+        glVertex3f(1, 1, 1)
+        glVertex3f(-1, 1, 1)
+        # Base
+        glVertex3f(-1, -1, -1)
+        glVertex3f(1, -1, -1)
+        glVertex3f(1, -1, 1)
+        glVertex3f(-1, -1, 1)
+        glEnd()
         glPopMatrix()
 
         # Cabeça
