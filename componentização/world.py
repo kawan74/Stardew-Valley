@@ -2,19 +2,16 @@ from OpenGL.GL import *
 from OpenGL.GLU import *
 import glfw
 import time
-import os
-from PIL import Image
+import numpy as np
+from OpenGL.GLU import * 
 
 class World:
     def __init__(self):
-        self.sky_color = (0.6, 0.8, 1.0)  # Cor inicial do céu (azul claro)
-        self.house_pos = [0.0, -1.0, 2.0]  # Posição da casa
-        self.ground_texture = None  # Variável para armazenar a textura do chão
+        self.sky_color = (0.6, 0.8, 1.0)
+        self.house_pos = [0.0, -1.0, 2.0]
+        self.ground_texture = None
 
     def lerp_color(self, cor1, cor2, t):
-        """
-        Interpola linearmente entre duas cores.
-        """
         return (
             cor1[0] + t * (cor2[0] - cor1[0]),
             cor1[1] + t * (cor2[1] - cor1[1]),
@@ -22,76 +19,87 @@ class World:
         )
 
     def update_sky_color(self, tempo_decorrido):
-        """
-        Atualiza a cor do céu com base no tempo decorrido.
-        """
         if tempo_decorrido < 15:
-            cor_dia = (0.6, 0.8, 1.0)  # Azul claro (dia)
-            cor_noite = (0.1, 0.1, 0.3)  # Azul escuro (noite)
-            t = tempo_decorrido / 30  # Interpolação baseada no tempo
+            cor_dia = (0.6, 0.8, 1.0)
+            cor_noite = (0.1, 0.1, 0.3)
+            t = tempo_decorrido / 30
             self.sky_color = self.lerp_color(cor_dia, cor_noite, t)
         else:
-            self.sky_color = (0.1, 0.1, 0.3)  # Cor fixa para noite
-        
-        # Define a cor de fundo (céu) com base na cor atual
+            self.sky_color = (0.1, 0.1, 0.3)
+
         glClearColor(self.sky_color[0], self.sky_color[1], self.sky_color[2], 1.0)
 
-    def carregar_textura(self, caminho_imagem: str) -> int:
-        """Carrega uma textura a partir de um arquivo de imagem."""
-        if not os.path.exists(caminho_imagem):
-            print(f"Erro: Arquivo de textura não encontrado em {caminho_imagem}")
-            return 0
+    def generate_grass_texture(self, width=256, height=256):
+        """
+        Gera uma textura simples de grama procedural.
+        """
+        texture_data = np.zeros((height, width, 3), dtype=np.uint8)
 
-        try:
-            image = Image.open(caminho_imagem).transpose(Image.FLIP_TOP_BOTTOM)
-        except Exception as erro:
-            print(f"Erro ao carregar a imagem '{caminho_imagem}': {erro}")
-            return 0
+        for y in range(height):
+            for x in range(width):
+                # Variação de verde para simular grama
+                green_shade = np.random.randint(130, 180)
+                texture_data[y, x] = [34, green_shade, 34]
 
-        width, height = image.size
-        data = image.convert('RGBA').tobytes()
+                # Podemos adicionar uma pequena variação de cor para tornar a textura mais realista
+                if np.random.random() < 0.05:  # Adiciona algumas "flores" aleatórias
+                    texture_data[y, x] = [255, 0, 0]  # Flor vermelha
 
-        tex = glGenTextures(1)
+        return texture_data.tobytes()
+
+    def carregar_textura_grama(self):
+        """
+        Carrega a textura de grama gerada.
+        """
+        texture_data = self.generate_grass_texture()
+
+        tex = glGenTextures(1)  # Criação de uma textura
         glBindTexture(GL_TEXTURE_2D, tex)
 
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR)
+        # Configuração dos parâmetros da textura
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR)
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR)
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT)
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT)
-        
-        glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_COMBINE)
-        
+
+        # Carregar a textura no OpenGL
         glTexImage2D(
-            GL_TEXTURE_2D, 
-            0, 
-            GL_RGBA, 
-            width, 
-            height, 
-            0, 
-            GL_RGBA, 
-            GL_UNSIGNED_BYTE, 
-            data
+            GL_TEXTURE_2D,
+            0,
+            GL_RGB,
+            256, 256,
+            0,
+            GL_RGB,
+            GL_UNSIGNED_BYTE,
+            texture_data
         )
-        
-        glGenerateMipmap(GL_TEXTURE_2D)
-        
-        glBindTexture(GL_TEXTURE_2D, 0)
-        print(f"Textura carregada com sucesso: {caminho_imagem}")
+
+        glBindTexture(GL_TEXTURE_2D, 0)  # Desvincular a textura
+
+        # Verificar se a textura foi carregada corretamente
+        if tex == 0:
+            print("Erro ao carregar a textura do chão.")
+        else:
+            print(f"Textura de grama carregada com sucesso: {tex}")
+
         return tex
-        
 
     def init_gl(self):
         glEnable(GL_DEPTH_TEST)
-        glEnable(GL_TEXTURE_2D)  # Habilitar texturas
+        glEnable(GL_TEXTURE_2D)
         glMatrixMode(GL_PROJECTION)
         glLoadIdentity()
-        gluPerspective(100, 800/800, 0.1, 100)
+        gluPerspective(100, 800 / 800, 0.1, 100)
         glMatrixMode(GL_MODELVIEW)
-        
-        # Carregar a textura do chão
-        self.ground_texture = self.carregar_textura('texturas/chao.png')
+
+        # Carregar a textura do chão (gráfico de grama)
+        self.ground_texture = self.carregar_textura_grama()
+
+        # Verificar se a textura foi carregada corretamente
         if self.ground_texture == 0:
             print("Erro ao carregar a textura do chão.")
+        else:
+            print("Textura de grama carregada com sucesso.")
 
     def draw_ground(self):
         if self.ground_texture:
@@ -116,7 +124,6 @@ class World:
         glRotatef(180, 0, 1, 0)
         glScalef(3.0, 3.0, 3.0)
 
-        # Desenhar a casa sem textura
         glColor3f(0.9, 0.6, 0.3)
         body_vertices = [
             [-0.3, 0.0, -0.3], [0.3, 0.0, -0.3], [0.3, 0.4, -0.3], [-0.3, 0.4, -0.3],
@@ -132,7 +139,6 @@ class World:
                 glVertex3fv(body_vertices[vertex])
         glEnd()
 
-        # Telhado
         glColor3f(0.7, 0.1, 0.1)
         roof_vertices = [
             [-0.35, 0.4, -0.35], [0.35, 0.4, -0.35], [0.0, 0.6, 0.0],
@@ -147,7 +153,6 @@ class World:
                 glVertex3fv(roof_vertices[vertex])
         glEnd()
 
-        # Porta
         glColor3f(0.5, 0.3, 0.1)
         door_vertices = [
             [-0.05, 0.0, -0.301], [0.05, 0.0, -0.301], [0.05, 0.15, -0.301], [-0.05, 0.15, -0.301]
@@ -157,7 +162,6 @@ class World:
             glVertex3fv(vertex)
         glEnd()
 
-        # Janelas
         glColor3f(0.7, 0.9, 1.0)
         windows = [
             [[-0.25, 0.1, -0.301], [-0.15, 0.1, -0.301], [-0.15, 0.2, -0.301], [-0.25, 0.2, -0.301]],
@@ -173,11 +177,10 @@ class World:
 
     def draw_clouds(self):
         def draw_single_cloud(x, y, z):
-            glColor3f(1.0, 1.0, 1.0)  # Branco
+            glColor3f(1.0, 1.0, 1.0)  
             glPushMatrix()
             glTranslatef(x, y, z)
             
-            # Várias esferas para formar uma nuvem
             positions = [(0,0,0), (0.3,0.1,0), (-0.3,0.1,0), (0.15,-0.1,0), (-0.15,-0.1,0)]
             for pos in positions:
                 glPushMatrix()
@@ -188,39 +191,33 @@ class World:
             
             glPopMatrix()
 
-        # Desenhar múltiplas nuvens em posições diferentes
         draw_single_cloud(-1, 2, -2)
         draw_single_cloud(1.5, 2.5, -3)
         draw_single_cloud(-2, 2.2, -4)
 
     def draw_fences(self):
-        glColor3f(0.6, 0.3, 0.0)  # Marrom para a cerca
+        glColor3f(0.6, 0.3, 0.0)  
         
-        # Desenha cercas ao redor da área do jogo
         for x in range(-5, 6, 1):
-            # Cerca frontal
             self.draw_fence_post(x, -1, -5)
-            # Cerca traseira
+        
             self.draw_fence_post(x, -1, 5)
             
         for z in range(-5, 6, 1):
-            # Cerca lateral esquerda
             self.draw_fence_post(-5, -1, z)
-            # Cerca lateral direita
+        
             self.draw_fence_post(5, -1, z)
 
     def draw_fence_post(self, x, y, z):
         glPushMatrix()
         glTranslatef(x, y, z)
         
-        # Poste vertical
         glPushMatrix()
         glScalef(0.1, 1.0, 0.1)
         quad = gluNewQuadric()
         gluCylinder(quad, 0.5, 0.5, 1, 8, 1)
         glPopMatrix()
         
-        # Travessa horizontal
         glPushMatrix()
         glTranslatef(0, 0.3, 0)
         glRotatef(90, 0, 1, 0)
@@ -243,8 +240,8 @@ class JogoOpenGL:
         self.altura = altura
         self.titulo = titulo
         self.window = None
-        self.world = World()  # Instância da classe World
-        self.tempo_inicio = time.time()  # Tempo inicial do jogo
+        self.world = World()  
+        self.tempo_inicio = time.time()  
 
     def iniciar_janela(self):
         if not glfw.init():
@@ -263,35 +260,26 @@ class JogoOpenGL:
         glfw.set_key_callback(self.window, self.teclado_callback)
         return True
 
-    def mouse_callback(self, window, xpos, ypos):
-        pass  # Implemente a lógica do mouse, se necessário
-
     def teclado_callback(self, window, key, scancode, action, mods):
         if key == glfw.KEY_ESCAPE and action == glfw.PRESS:
             glfw.set_window_should_close(self.window, True)
-
-    def processar_entrada(self):
-        pass  # Implemente a lógica de entrada, se necessário
 
     def desenhar_cenario(self):
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
         glLoadIdentity()
 
-        # Atualiza a cor do céu com base no tempo decorrido
         tempo_decorrido = time.time() - self.tempo_inicio
         self.world.update_sky_color(tempo_decorrido)
 
-        # Configurar a câmera
         gluLookAt(0, 0, 10, 0, 0, 0, 0, 1, 0)
 
-        # Desenhar o cenário
         self.world.draw()
 
     def executar(self):
         if not self.iniciar_janela():
             return
 
-        self.world.init_gl()  # Inicializa o OpenGL
+        self.world.init_gl()  
 
         while not glfw.window_should_close(self.window):
             glfw.poll_events()
