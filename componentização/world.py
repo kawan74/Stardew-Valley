@@ -74,6 +74,10 @@ class World:
             texture_data
         )
 
+        error = glGetError()
+        if error != GL_NO_ERROR:
+            print(f"Erro ao carregar a textura: {gluErrorString(error)}")
+
         glBindTexture(GL_TEXTURE_2D, 0)  # Desvincular a textura
 
         # Verificar se a textura foi carregada corretamente
@@ -105,6 +109,8 @@ class World:
         if self.ground_texture:
             glEnable(GL_TEXTURE_2D)
             glBindTexture(GL_TEXTURE_2D, self.ground_texture)
+
+            glColor3f(1.0, 1.0, 1.0)  # Define a cor para branco para não alterar a textura
 
             glBegin(GL_QUADS)
             glTexCoord2f(0.0, 0.0); glVertex3f(-5, -1, -5)  # Canto inferior esquerdo
