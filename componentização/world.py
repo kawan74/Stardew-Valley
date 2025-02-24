@@ -218,18 +218,79 @@ class World:
         glPushMatrix()
         glTranslatef(x, y, z)
         
+        # Draw vertical post
         glPushMatrix()
-        glScalef(0.1, 1.0, 0.1)
-        quad = gluNewQuadric()
-        gluCylinder(quad, 0.5, 0.5, 1, 8, 1)
+        glScalef(0.1, 1.0, 0.1)  # Scale to make it a rectangular post
+        glBegin(GL_QUADS)
+        # Front face
+        glVertex3f(-0.5, 0.0, 0.5)
+        glVertex3f(0.5, 0.0, 0.5)
+        glVertex3f(0.5, 1.0, 0.5)
+        glVertex3f(-0.5, 1.0, 0.5)
+        # Back face
+        glVertex3f(-0.5, 0.0, -0.5)
+        glVertex3f(0.5, 0.0, -0.5)
+        glVertex3f(0.5, 1.0, -0.5)
+        glVertex3f(-0.5, 1.0, -0.5)
+        # Left face
+        glVertex3f(-0.5, 0.0, -0.5)
+        glVertex3f(-0.5, 0.0, 0.5)
+        glVertex3f(-0.5, 1.0, 0.5)
+        glVertex3f(-0.5, 1.0, -0.5)
+        # Right face
+        glVertex3f(0.5, 0.0, -0.5)
+        glVertex3f(0.5, 0.0, 0.5)
+        glVertex3f(0.5, 1.0, 0.5)
+        glVertex3f(0.5, 1.0, -0.5)
+        # Top face
+        glVertex3f(-0.5, 1.0, -0.5)
+        glVertex3f(0.5, 1.0, -0.5)
+        glVertex3f(0.5, 1.0, 0.5)
+        glVertex3f(-0.5, 1.0, 0.5)
+        # Bottom face
+        glVertex3f(-0.5, 0.0, -0.5)
+        glVertex3f(0.5, 0.0, -0.5)
+        glVertex3f(0.5, 0.0, 0.5)
+        glVertex3f(-0.5, 0.0, 0.5)
+        glEnd()
         glPopMatrix()
         
+        # Draw horizontal rail
         glPushMatrix()
-        glTranslatef(0, 0.3, 0)
-        glRotatef(90, 0, 1, 0)
-        glScalef(0.1, 0.1, 1.0)
-        quad = gluNewQuadric()
-        gluCylinder(quad, 0.5, 0.5, 1, 8, 1)
+        glTranslatef(0, 0.5, 0)  # Position the rail in the middle of the post
+        glScalef(1.0, 0.1, 0.1)  # Scale to make it a horizontal rail
+        glBegin(GL_QUADS)
+        # Front face
+        glVertex3f(-0.5, -0.5, 0.5)
+        glVertex3f(0.5, -0.5, 0.5)
+        glVertex3f(0.5, 0.5, 0.5)
+        glVertex3f(-0.5, 0.5, 0.5)
+        # Back face
+        glVertex3f(-0.5, -0.5, -0.5)
+        glVertex3f(0.5, -0.5, -0.5)
+        glVertex3f(0.5, 0.5, -0.5)
+        glVertex3f(-0.5, 0.5, -0.5)
+        # Left face
+        glVertex3f(-0.5, -0.5, -0.5)
+        glVertex3f(-0.5, -0.5, 0.5)
+        glVertex3f(-0.5, 0.5, 0.5)
+        glVertex3f(-0.5, 0.5, -0.5)
+        # Right face
+        glVertex3f(0.5, -0.5, -0.5)
+        glVertex3f(0.5, -0.5, 0.5)
+        glVertex3f(0.5, 0.5, 0.5)
+        glVertex3f(0.5, 0.5, -0.5)
+        # Top face
+        glVertex3f(-0.5, 0.5, -0.5)
+        glVertex3f(0.5, 0.5, -0.5)
+        glVertex3f(0.5, 0.5, 0.5)
+        glVertex3f(-0.5, 0.5, 0.5)
+        # Bottom face
+        glVertex3f(-0.5, -0.5, -0.5)
+        glVertex3f(0.5, -0.5, -0.5)
+        glVertex3f(0.5, -0.5, 0.5)
+        glVertex3f(-0.5, -0.5, 0.5)
+        glEnd()
         glPopMatrix()
         
         glPopMatrix()
