@@ -30,39 +30,29 @@ class World:
         glClearColor(self.sky_color[0], self.sky_color[1], self.sky_color[2], 1.0)
 
     def generate_grass_texture(self, width=256, height=256):
-        """
-        Gera uma textura simples de grama procedural.
-        """
         texture_data = np.zeros((height, width, 3), dtype=np.uint8)
 
         for y in range(height):
             for x in range(width):
-                # Variação de verde para simular grama
                 green_shade = np.random.randint(130, 180)
                 texture_data[y, x] = [34, green_shade, 34]
 
-                # Podemos adicionar uma pequena variação de cor para tornar a textura mais realista
-                if np.random.random() < 0.05:  # Adiciona algumas "flores" aleatórias
-                    texture_data[y, x] = [255, 0, 0]  # Flor vermelha
+                if np.random.random() < 0.05:
+                    texture_data[y, x] = [255, 0, 0]
 
         return texture_data.tobytes()
 
     def carregar_textura_grama(self):
-        """
-        Carrega a textura de grama gerada.
-        """
         texture_data = self.generate_grass_texture()
 
-        tex = glGenTextures(1)  # Criação de uma textura
+        tex = glGenTextures(1)
         glBindTexture(GL_TEXTURE_2D, tex)
 
-        # Configuração dos parâmetros da textura
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR)
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR)
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT)
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT)
 
-        # Carregar a textura no OpenGL
         glTexImage2D(
             GL_TEXTURE_2D,
             0,
@@ -78,9 +68,8 @@ class World:
         if error != GL_NO_ERROR:
             print(f"Erro ao carregar a textura: {gluErrorString(error)}")
 
-        glBindTexture(GL_TEXTURE_2D, 0)  # Desvincular a textura
+        glBindTexture(GL_TEXTURE_2D, 0)
 
-        # Verificar se a textura foi carregada corretamente
         if tex == 0:
             print("Erro ao carregar a textura do chão.")
         else:
@@ -96,10 +85,8 @@ class World:
         gluPerspective(100, 800 / 800, 0.1, 100)
         glMatrixMode(GL_MODELVIEW)
 
-        # Carregar a textura do chão (gráfico de grama)
         self.ground_texture = self.carregar_textura_grama()
 
-        # Verificar se a textura foi carregada corretamente
         if self.ground_texture == 0:
             print("Erro ao carregar a textura do chão.")
         else:
@@ -110,13 +97,13 @@ class World:
             glEnable(GL_TEXTURE_2D)
             glBindTexture(GL_TEXTURE_2D, self.ground_texture)
 
-            glColor3f(1.0, 1.0, 1.0)  # Define a cor para branco para não alterar a textura
+            glColor3f(1.0, 1.0, 1.0)
 
             glBegin(GL_QUADS)
-            glTexCoord2f(0.0, 0.0); glVertex3f(-5, -1, -5)  # Canto inferior esquerdo
-            glTexCoord2f(1.0, 0.0); glVertex3f(5, -1, -5)   # Canto inferior direito
-            glTexCoord2f(1.0, 1.0); glVertex3f(5, -1, 5)    # Canto superior direito
-            glTexCoord2f(0.0, 1.0); glVertex3f(-5, -1, 5)   # Canto superior esquerdo
+            glTexCoord2f(0.0, 0.0); glVertex3f(-5, -1, -5)
+            glTexCoord2f(1.0, 0.0); glVertex3f(5, -1, -5)
+            glTexCoord2f(1.0, 1.0); glVertex3f(5, -1, 5)
+            glTexCoord2f(0.0, 1.0); glVertex3f(-5, -1, 5)
             glEnd()
 
             glBindTexture(GL_TEXTURE_2D, 0)
@@ -218,36 +205,32 @@ class World:
         glPushMatrix()
         glTranslatef(x, y, z)
         
-        # Draw vertical post
+        if x == -5 or x == 5:
+            glRotatef(90, 0, 1, 0)
+
         glPushMatrix()
-        glScalef(0.1, 1.0, 0.1)  # Scale to make it a rectangular post
+        glScalef(0.1, 1.0, 0.1)
         glBegin(GL_QUADS)
-        # Front face
         glVertex3f(-0.5, 0.0, 0.5)
         glVertex3f(0.5, 0.0, 0.5)
         glVertex3f(0.5, 1.0, 0.5)
         glVertex3f(-0.5, 1.0, 0.5)
-        # Back face
         glVertex3f(-0.5, 0.0, -0.5)
         glVertex3f(0.5, 0.0, -0.5)
         glVertex3f(0.5, 1.0, -0.5)
         glVertex3f(-0.5, 1.0, -0.5)
-        # Left face
         glVertex3f(-0.5, 0.0, -0.5)
         glVertex3f(-0.5, 0.0, 0.5)
         glVertex3f(-0.5, 1.0, 0.5)
         glVertex3f(-0.5, 1.0, -0.5)
-        # Right face
         glVertex3f(0.5, 0.0, -0.5)
         glVertex3f(0.5, 0.0, 0.5)
         glVertex3f(0.5, 1.0, 0.5)
         glVertex3f(0.5, 1.0, -0.5)
-        # Top face
         glVertex3f(-0.5, 1.0, -0.5)
         glVertex3f(0.5, 1.0, -0.5)
         glVertex3f(0.5, 1.0, 0.5)
         glVertex3f(-0.5, 1.0, 0.5)
-        # Bottom face
         glVertex3f(-0.5, 0.0, -0.5)
         glVertex3f(0.5, 0.0, -0.5)
         glVertex3f(0.5, 0.0, 0.5)
@@ -255,37 +238,30 @@ class World:
         glEnd()
         glPopMatrix()
         
-        # Draw horizontal rail
         glPushMatrix()
-        glTranslatef(0, 0.5, 0)  # Position the rail in the middle of the post
-        glScalef(1.0, 0.1, 0.1)  # Scale to make it a horizontal rail
+        glTranslatef(0, 0.5, 0)
+        glScalef(1.0, 0.1, 0.1)
         glBegin(GL_QUADS)
-        # Front face
         glVertex3f(-0.5, -0.5, 0.5)
         glVertex3f(0.5, -0.5, 0.5)
         glVertex3f(0.5, 0.5, 0.5)
         glVertex3f(-0.5, 0.5, 0.5)
-        # Back face
         glVertex3f(-0.5, -0.5, -0.5)
         glVertex3f(0.5, -0.5, -0.5)
         glVertex3f(0.5, 0.5, -0.5)
         glVertex3f(-0.5, 0.5, -0.5)
-        # Left face
         glVertex3f(-0.5, -0.5, -0.5)
         glVertex3f(-0.5, -0.5, 0.5)
         glVertex3f(-0.5, 0.5, 0.5)
         glVertex3f(-0.5, 0.5, -0.5)
-        # Right face
         glVertex3f(0.5, -0.5, -0.5)
         glVertex3f(0.5, -0.5, 0.5)
         glVertex3f(0.5, 0.5, 0.5)
         glVertex3f(0.5, 0.5, -0.5)
-        # Top face
         glVertex3f(-0.5, 0.5, -0.5)
         glVertex3f(0.5, 0.5, -0.5)
         glVertex3f(0.5, 0.5, 0.5)
         glVertex3f(-0.5, 0.5, 0.5)
-        # Bottom face
         glVertex3f(-0.5, -0.5, -0.5)
         glVertex3f(0.5, -0.5, -0.5)
         glVertex3f(0.5, -0.5, 0.5)

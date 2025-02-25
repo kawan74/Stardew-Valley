@@ -20,7 +20,6 @@ if __name__ == '__main__':
         jogo.adicionar_planta("flor", inicio_x - espacamento, inicio_z + (i * espacamento))
         jogo.adicionar_planta("flor", inicio_x + (colunas * espacamento), inicio_z + (i * espacamento))
     
-    
     for x in range(-2, 3):  
         jogo.adicionar_planta("flor", x, 2)  
     

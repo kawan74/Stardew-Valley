@@ -29,10 +29,8 @@ class Player:
             nova_pos_x += self.speed * front_z
             nova_pos_z -= self.speed * front_x
 
-        # Limites do mundo
         limite_min, limite_max = -4.5, 4.5
 
-        # Limites da casa
         house_pos = [0.0, -1.0, 2.0]
         house_scale = 3.0
         house_min_x = house_pos[0] - 0.3 * house_scale
@@ -40,7 +38,6 @@ class Player:
         house_min_z = house_pos[2] - 0.3 * house_scale
         house_max_z = house_pos[2] + 0.3 * house_scale
 
-        # Verificação de colisão com a casa
         if not (house_min_x <= nova_pos_x <= house_max_x and house_min_z <= nova_pos_z <= house_max_z):
             if limite_min <= nova_pos_x <= limite_max:
                 self.pos[0] = nova_pos_x
@@ -52,37 +49,30 @@ class Player:
         glTranslatef(self.pos[0], self.pos[1]-0.5, self.pos[2])
         glRotatef(180, 0, 1, 0)
         
-        # Corpo retangular mais fino
         glColor3f(0.2, 0.4, 0.8)
         glPushMatrix()
-        glScalef(0.1, 0.3, 0.05)  # Ajuste para um corpo mais fino
+        glScalef(0.1, 0.3, 0.05)
         glBegin(GL_QUADS)
-        # Frente
         glVertex3f(-1, -1, 1)
         glVertex3f(1, -1, 1)
         glVertex3f(1, 1, 1)
         glVertex3f(-1, 1, 1)
-        # Trás
         glVertex3f(-1, -1, -1)
         glVertex3f(1, -1, -1)
         glVertex3f(1, 1, -1)
         glVertex3f(-1, 1, -1)
-        # Esquerda
         glVertex3f(-1, -1, -1)
         glVertex3f(-1, -1, 1)
         glVertex3f(-1, 1, 1)
         glVertex3f(-1, 1, -1)
-        # Direita
         glVertex3f(1, -1, -1)
         glVertex3f(1, -1, 1)
         glVertex3f(1, 1, 1)
         glVertex3f(1, 1, -1)
-        # Topo
         glVertex3f(-1, 1, -1)
         glVertex3f(1, 1, -1)
         glVertex3f(1, 1, 1)
         glVertex3f(-1, 1, 1)
-        # Base
         glVertex3f(-1, -1, -1)
         glVertex3f(1, -1, -1)
         glVertex3f(1, -1, 1)
@@ -90,7 +80,6 @@ class Player:
         glEnd()
         glPopMatrix()
 
-        # Cabeça
         glColor3f(0.8, 0.6, 0.4)
         glPushMatrix()
         glTranslatef(0, 0.4, 0)
@@ -98,7 +87,6 @@ class Player:
         gluSphere(quad, 0.1, 16, 16)
         glPopMatrix()
 
-        # Braços
         glColor3f(0.2, 0.4, 0.8)
         for x in [-0.15, 0.15]:
             glPushMatrix()
@@ -108,7 +96,6 @@ class Player:
             gluCylinder(quad, 0.03, 0.03, 0.2, 8, 8)
             glPopMatrix()
 
-        # Pernas
         for x in [-0.07, 0.07]:
             glPushMatrix()
             glTranslatef(x, -0.1, 0)

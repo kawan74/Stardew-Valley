@@ -47,33 +47,29 @@ class Entities:
 
     def draw_galinha(self, x, z):
         glPushMatrix()
-        glTranslatef(x, -0.8, z)  # Posiciona a galinha no chão
+        glTranslatef(x, -0.8, z)
         
-        # Corpo
-        glColor3f(1.0, 1.0, 1.0)  # Branco
+        glColor3f(1.0, 1.0, 1.0)
         quad = gluNewQuadric()
         glPushMatrix()
         glScalef(1.0, 0.8, 1.0)
         gluSphere(quad, 0.15, 8, 8)
         glPopMatrix()
         
-        # Cabeça
         glPushMatrix()
         glRotatef(90, 0, 1, 0)
         glTranslatef(0.1, 0.1, 0)
         gluSphere(quad, 0.08, 8, 8)
         glPopMatrix()
         
-        # Bico
-        glColor3f(1.0, 0.5, 0.0)  # Laranja
+        glColor3f(1.0, 0.5, 0.0)
         glPushMatrix()
         glTranslatef(0.18, 0.1, 0)
         glScalef(0.5, 0.5, 0.5)
         gluSphere(quad, 0.05, 8, 8)
         glPopMatrix()
         
-        # Pernas
-        glColor3f(1.0, 0.5, 0.0)  # Laranja
+        glColor3f(1.0, 0.5, 0.0)
         for offset in [-0.05, 0.05]:
             glPushMatrix()
             glTranslatef(0, -0.1, offset)
@@ -87,16 +83,14 @@ class Entities:
         glPushMatrix()
         glTranslatef(x, -1, z)
         
-        # Caule
-        glColor3f(0.0, 0.5, 0.0)  # Verde escuro
+        glColor3f(0.0, 0.5, 0.0)
         quad = gluNewQuadric()
         glPushMatrix()
         glRotatef(-90, 1, 0, 0)
         gluCylinder(quad, 0.02, 0.02, 0.2, 8, 1)
         glPopMatrix()
         
-        # Folhas
-        glColor3f(0.0, 0.8, 0.0)  # Verde claro
+        glColor3f(0.0, 0.8, 0.0)
         for angulo in [0, 90, 180, 270]:
             glPushMatrix()
             glTranslatef(0, 0.1, 0)

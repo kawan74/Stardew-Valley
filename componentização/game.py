@@ -27,11 +27,11 @@ class JogoOpenGL:
         self.last_x = largura // 2
         self.last_y = altura // 2
         self.habilitar_movimento_mouse = True
-        self.plantas = []  # Lista para armazenar as plantas
+        self.plantas = []
         self.monsters = []
         self.last_monster_spawn = 0
-        self.monster_spawn_interval = 1  # Spawn mais frequente
-        self.dia_duracao = 20  # 20 segundos por dia (10 dia + 10 noite)
+        self.monster_spawn_interval = 1
+        self.dia_duracao = 20
 
     def iniciar_janela(self):
         if not glfw.init():
@@ -71,14 +71,11 @@ class JogoOpenGL:
         tempo_atual = time.time() - self.tempo_inicio
         horas = (tempo_atual % self.dia_duracao) * 24 / self.dia_duracao
         
-        # Debug da hora
-        
-        # Definir se é dia ou noite
-        if horas >= 18 or horas < 6:  # Noite
-            glClearColor(0.1, 0.1, 0.3, 1.0)  # Céu escuro
-            self.spawn_monster()  # Tenta criar monstro
-        else:  # Dia
-            glClearColor(0.5, 0.7, 1.0, 1.0)  # Céu claro
+        if horas >= 18 or horas < 6:
+            glClearColor(0.1, 0.1, 0.3, 1.0)
+            self.spawn_monster()
+        else:
+            glClearColor(0.5, 0.7, 1.0, 1.0)
         
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
         glLoadIdentity()
@@ -88,19 +85,16 @@ class JogoOpenGL:
         
         self.camera.apply()
         
-        # Desenhar elementos do mundo
         self.world.draw()
         self.player.draw()
         self.entities.draw()
 
-        # Desenhar todas as plantas
         for planta in self.plantas:
             if planta['tipo'] == 'tomate':
                 self.draw_tomate(planta['x'], planta['z'])
-            else:  # tipo == 'flor'
+            else:
                 self.draw_planta(planta['x'], planta['z'])
 
-        # Desenhar monstros
         for monster in self.monsters:
             self.draw_monster(monster['x'], monster['y'], monster['z'])
             self.update_monster_position(monster)
@@ -122,12 +116,6 @@ class JogoOpenGL:
         glfw.terminate()
 
     def adicionar_planta(self, tipo, x, z):
-        """Adiciona uma nova planta ao jogo
-        Args:
-            tipo (str): Tipo da planta ('tomate' ou 'flor')
-            x (float): Posição X da planta
-            z (float): Posição Z da planta
-        """
         self.plantas.append({
             'tipo': tipo,
             'x': x,
@@ -138,16 +126,14 @@ class JogoOpenGL:
         glPushMatrix()
         glTranslatef(x, -1, z)
         
-        # Caule principal
-        glColor3f(0.2, 0.5, 0.1)  # Verde escuro para o caule
+        glColor3f(0.2, 0.5, 0.1)
         quad = gluNewQuadric()
         glPushMatrix()
         glRotatef(-90, 1, 0, 0)
         gluCylinder(quad, 0.03, 0.03, 0.5, 8, 1)
         glPopMatrix()
         
-        # Folhas
-        glColor3f(0.2, 0.6, 0.1)  # Verde para as folhas
+        glColor3f(0.2, 0.6, 0.1)
         for angulo in [0, 45, 90, 135, 180, 225, 270, 315]:
             glPushMatrix()
             glTranslatef(0, 0.2, 0)
@@ -158,28 +144,20 @@ class JogoOpenGL:
             gluSphere(quad, 0.5, 8, 8)
             glPopMatrix()
         
-        # Tomates vermelhos
-        glColor3f(0.9, 0.1, 0.1)  # Vermelho vivo
+        glColor3f(0.9, 0.1, 0.1)
         posicoes_tomates = [
-            # Camada inferior
             (0.1, 0.15, 0.1),
             (-0.1, 0.15, -0.1),
             (0.15, 0.15, -0.05),
             (-0.15, 0.15, 0.1),
-            
-            # Camada média
             (0.1, 0.25, 0.0),
             (-0.05, 0.25, 0.15),
             (0.0, 0.25, -0.15),
             (-0.12, 0.25, 0.05),
-            
-            # Camada superior
             (0.08, 0.35, 0.08),
             (-0.08, 0.35, -0.08),
             (0.0, 0.35, 0.1),
             (-0.1, 0.35, 0.0),
-            
-            # Tomates no topo
             (0.05, 0.45, 0.0),
             (-0.05, 0.45, 0.05),
             (0.0, 0.45, -0.05)
@@ -194,7 +172,6 @@ class JogoOpenGL:
             gluSphere(quad, 1.0, 8, 8)
             glPopMatrix()
             
-            # Pequena folha verde no topo
             glColor3f(0.2, 0.5, 0.1)
             glPushMatrix()
             glTranslatef(pos[0], pos[1] + 0.04, pos[2])
@@ -206,19 +183,17 @@ class JogoOpenGL:
 
     def draw_planta(self, x, z):
         glPushMatrix()
-        glTranslatef(x, -1, z)
+        glTranslatef(x + 0.5, -1, z)
         
-        # Caule
-        glColor3f(0.0, 0.5, 0.0)  # Verde para o caule
+        glColor3f(0.0, 0.5, 0.0)
         quad = gluNewQuadric()
         glPushMatrix()
         glRotatef(-90, 1, 0, 0)
         gluCylinder(quad, 0.02, 0.02, 0.2, 8, 1)
         glPopMatrix()
         
-        # Flores/Pétalas em roxo
-        glColor3f(0.6, 0.0, 0.8)  # Roxo vibrante
-        for angulo in [0, 72, 144, 216, 288]:  # 5 pétalas
+        glColor3f(0.6, 0.0, 0.8)
+        for angulo in [0, 72, 144, 216, 288]:
             glPushMatrix()
             glTranslatef(0, 0.1, 0)
             glRotatef(angulo, 0, 1, 0)
@@ -228,8 +203,7 @@ class JogoOpenGL:
             gluSphere(quad, 0.5, 8, 8)
             glPopMatrix()
         
-        # Centro da flor em roxo mais escuro
-        glColor3f(0.4, 0.0, 0.6)  # Roxo mais escuro
+        glColor3f(0.4, 0.0, 0.6)
         glPushMatrix()
         glTranslatef(0, 0.1, 0)
         glScalef(0.1, 0.1, 0.1)
@@ -241,38 +215,33 @@ class JogoOpenGL:
     def draw_player(self):
         glPushMatrix()
         try:
-            glTranslatef(self.player.pos[0], self.player.pos[1] + 0.5, self.player.pos[2])  # Levantei um pouco o boneco
+            glTranslatef(self.player.pos[0], self.player.pos[1] + 0.5, self.player.pos[2])
             glRotatef(self.player.rotation[1], 0, 1, 0)
-            glScalef(1.5, 1.5, 1.5)  # Aumentei o tamanho geral do boneco
+            glScalef(1.5, 1.5, 1.5)
             
             quad = gluNewQuadric()
             
-            # Corpo (tronco) - mais largo
-            glColor3f(0.2, 0.4, 0.8)  # Azul mais vivo
+            glColor3f(0.2, 0.4, 0.8)
             glPushMatrix()
             glScalef(0.4, 0.5, 0.3)
-            gluCylinder(quad, 1.0, 0.8, 1.0, 16, 16)  # Usando cilindro para o corpo
+            gluCylinder(quad, 1.0, 0.8, 1.0, 16, 16)
             glPopMatrix()
 
-            # Cabeça - maior e mais redonda
-            glColor3f(0.95, 0.75, 0.6)  # Cor de pele
+            glColor3f(0.95, 0.75, 0.6)
             glPushMatrix()
             glTranslatef(0, 0.8, 0)
             glScalef(0.4, 0.4, 0.4)
             gluSphere(quad, 1.0, 16, 16)
             glPopMatrix()
 
-            # Cabelo - mais volumoso
-            glColor3f(0.3, 0.2, 0.1)  # Castanho
+            glColor3f(0.3, 0.2, 0.1)
             glPushMatrix()
             glTranslatef(0, 0.9, 0)
             glScalef(0.42, 0.2, 0.42)
             gluSphere(quad, 1.0, 16, 16)
             glPopMatrix()
 
-            # Braços - mais grossos e curtos
-            glColor3f(0.2, 0.4, 0.8)  # Azul
-            # Braço esquerdo
+            glColor3f(0.2, 0.4, 0.8)
             glPushMatrix()
             glTranslatef(-0.5, 0.3, 0)
             glRotatef(20, 0, 0, 1)
@@ -280,7 +249,6 @@ class JogoOpenGL:
             gluCylinder(quad, 1.0, 0.8, 1.0, 12, 12)
             glPopMatrix()
             
-            # Braço direito
             glPushMatrix()
             glTranslatef(0.5, 0.3, 0)
             glRotatef(-20, 0, 0, 1)
@@ -288,16 +256,13 @@ class JogoOpenGL:
             gluCylinder(quad, 1.0, 0.8, 1.0, 12, 12)
             glPopMatrix()
 
-            # Pernas - mais grossas
-            glColor3f(0.2, 0.2, 0.7)  # Azul escuro
-            # Perna esquerda
+            glColor3f(0.2, 0.2, 0.7)
             glPushMatrix()
             glTranslatef(-0.2, -0.5, 0)
             glScalef(0.18, 0.5, 0.18)
             gluCylinder(quad, 1.0, 0.8, 1.0, 12, 12)
             glPopMatrix()
             
-            # Perna direita
             glPushMatrix()
             glTranslatef(0.2, -0.5, 0)
             glScalef(0.18, 0.5, 0.18)
@@ -311,9 +276,8 @@ class JogoOpenGL:
         tempo_atual = time.time() - self.tempo_inicio
         
         if tempo_atual - self.last_monster_spawn > self.monster_spawn_interval:
-            # Posição aleatória em volta do jogador
             angulo = random.uniform(0, 2 * math.pi)
-            distancia = 8  # Distância fixa do jogador
+            distancia = 8
             
             x = self.player.pos[0] + distancia * math.cos(angulo)
             z = self.player.pos[2] + distancia * math.sin(angulo)
@@ -322,23 +286,21 @@ class JogoOpenGL:
                 'x': x,
                 'y': 0,
                 'z': z,
-                'speed': 0.1  # Velocidade aumentada
+                'speed': 0.1
             }
             
             self.monsters.append(novo_monstro)
             self.last_monster_spawn = tempo_atual
 
     def update_monster_position(self, monster):
-        # Mover em direção ao jogador
         dx = self.player.pos[0] - monster['x']
         dz = self.player.pos[2] - monster['z']
         distancia = math.sqrt(dx*dx + dz*dz)
         
-        if distancia > 0.5:  # Se não está muito perto
+        if distancia > 0.5:
             monster['x'] += (dx/distancia) * monster['speed']
             monster['z'] += (dz/distancia) * monster['speed']
         
-        # Remover monstro se encostar no jogador
         if distancia < 1.0:
             self.monsters.remove(monster)
 
@@ -346,74 +308,61 @@ class JogoOpenGL:
         glEnable(GL_LIGHTING)
         glEnable(GL_LIGHT0)
 
-        # Definir a posição da luz
         light_pos = [1.0, 1.0, 1.0, 1.0]
         glLightfv(GL_LIGHT0, GL_POSITION, light_pos)
 
-        # Definir a direção da luz spot
-        spot_direction = [-1.0, -1.0, -1.0]  # Direção para onde a luz está apontando
+        spot_direction = [-1.0, -1.0, -1.0]
         glLightfv(GL_LIGHT0, GL_SPOT_DIRECTION, spot_direction)
 
-        # Definir o ângulo de corte da luz spot
-        glLightf(GL_LIGHT0, GL_SPOT_CUTOFF, 90.0)  # Ângulo de corte em graus
+        glLightf(GL_LIGHT0, GL_SPOT_CUTOFF, 90.0)
 
-        # Diminuir ainda mais as propriedades da luz
-        glLightfv(GL_LIGHT0, GL_AMBIENT, [0.02, 0.02, 0.02, 1.0])  # Muito reduzido
-        glLightfv(GL_LIGHT0, GL_DIFFUSE, [0.1, 0.1, 0.1, 1.0])    # Muito reduzido
-        glLightfv(GL_LIGHT0, GL_SPECULAR, [0.2, 0.2, 0.2, 1.0])   # Muito reduzido
+        glLightfv(GL_LIGHT0, GL_AMBIENT, [0.02, 0.02, 0.02, 1.0])
+        glLightfv(GL_LIGHT0, GL_DIFFUSE, [0.1, 0.1, 0.1, 1.0])
+        glLightfv(GL_LIGHT0, GL_SPECULAR, [0.2, 0.2, 0.2, 1.0])
 
-        # Configurar atenuação da luz
         glLightf(GL_LIGHT0, GL_CONSTANT_ATTENUATION, 1.0)
         glLightf(GL_LIGHT0, GL_LINEAR_ATTENUATION, 0.1)
         glLightf(GL_LIGHT0, GL_QUADRATIC_ATTENUATION, 0.05)
 
-        # Diminuir ainda mais as propriedades do material do monstro
-        glMaterialfv(GL_FRONT, GL_AMBIENT, [0.02, 0.02, 0.02, 1.0])  # Muito reduzido
-        glMaterialfv(GL_FRONT, GL_DIFFUSE, [0.1, 0.1, 0.1, 1.0])     # Muito reduzido
-        glMaterialfv(GL_FRONT, GL_SPECULAR, [0.1, 0.1, 0.1, 1.0])    # Muito reduzido
-        glMaterialf(GL_FRONT, GL_SHININESS, 8.0)                     # Muito reduzido
+        glMaterialfv(GL_FRONT, GL_AMBIENT, [0.02, 0.02, 0.02, 1.0])
+        glMaterialfv(GL_FRONT, GL_DIFFUSE, [0.1, 0.1, 0.1, 1.0])
+        glMaterialfv(GL_FRONT, GL_SPECULAR, [0.1, 0.1, 0.1, 1.0])
+        glMaterialf(GL_FRONT, GL_SHININESS, 8.0)
 
         glPushMatrix()
         glTranslatef(x, y, z)
-        glScalef(0.1, 0.1, 0.1)  # Tamanho base do monstro
+        glScalef(0.1, 0.1, 0.1)
 
         quad = gluNewQuadric()
 
-        # Corpo principal (torso)
-        glColor3f(0.1, 0.1, 0.1)  # Preto principal
+        glColor3f(0.1, 0.1, 0.1)
         glPushMatrix()
         glScalef(1.0, 1.2, 0.8)
         gluSphere(quad, 1.0, 16, 16)
         glPopMatrix()
 
-        # Cabeça
         glPushMatrix()
         glTranslatef(0, 1.0, 0)
         glScalef(0.8, 0.8, 0.8)
         gluSphere(quad, 1.0, 16, 16)
 
-        # Olhos (brilhantes em contraste com o corpo preto)
         for lado in [-0.3, 0.3]:
             glPushMatrix()
             glTranslatef(lado, 0.2, 0.7)
 
-            # Globo ocular (branco)
             glColor3f(0.9, 0.9, 0.9)
             gluSphere(quad, 0.25, 12, 12)
 
-            # Íris (vermelho intenso)
             glColor3f(1.0, 0.0, 0.0)
             glTranslatef(0, 0, 0.15)
             gluSphere(quad, 0.15, 8, 8)
 
-            # Pupila (preta)
             glColor3f(0.0, 0.0, 0.0)
             glTranslatef(0, 0, 0.05)
             gluSphere(quad, 0.08, 8, 8)
 
             glPopMatrix()
 
-        # Presas (branco marfim)
         glColor3f(0.95, 0.95, 0.95)
         for lado in [-0.2, 0.2]:
             glPushMatrix()
@@ -422,63 +371,51 @@ class JogoOpenGL:
             gluCylinder(quad, 0.08, 0.0, 0.3, 8, 1)
             glPopMatrix()
 
-        glPopMatrix()  # Fim da cabeça
+        glPopMatrix()
 
-        # Braços
-        glColor3f(0.15, 0.15, 0.15)  # Preto um pouco mais claro para contraste
+        glColor3f(0.15, 0.15, 0.15)
         for lado in [-1, 1]:
             glPushMatrix()
             glTranslatef(lado * 0.8, 0.3, 0)
 
-            # Ombro
             gluSphere(quad, 0.3, 12, 12)
 
-            # Braço superior
             glRotatef(lado * 20, 0, 0, 1)
             glRotatef(30, 1, 0, 0)
             gluCylinder(quad, 0.2, 0.15, 0.8, 12, 1)
 
-            # Cotovelo
             glTranslatef(0, 0, 0.8)
             gluSphere(quad, 0.2, 12, 12)
 
-            # Antebraço
             glRotatef(30, 1, 0, 0)
             gluCylinder(quad, 0.15, 0.1, 0.6, 12, 1)
 
-            # Mão
             glTranslatef(0, 0, 0.6)
             gluSphere(quad, 0.2, 12, 12)
 
             glPopMatrix()
 
-        # Pernas
         for lado in [-1, 1]:
             glPushMatrix()
             glTranslatef(lado * 0.4, -1.0, 0)
 
-            # Coxa
             glColor3f(0.15, 0.15, 0.15)
             glRotatef(lado * 10, 0, 0, 1)
             gluCylinder(quad, 0.25, 0.2, 0.8, 12, 1)
 
-            # Joelho
             glTranslatef(0, 0, 0.8)
             gluSphere(quad, 0.25, 12, 12)
 
-            # Canela
             glRotatef(10, 1, 0, 0)
             gluCylinder(quad, 0.2, 0.15, 0.7, 12, 1)
 
-            # Pé
             glTranslatef(0, 0, 0.7)
             glScalef(1.0, 1.0, 1.5)
             gluSphere(quad, 0.2, 12, 12)
 
             glPopMatrix()
 
-        # Detalhes do corpo (manchas em preto mais escuro)
-        glColor3f(0.05, 0.05, 0.05)  # Preto mais escuro para as manchas
+        glColor3f(0.05, 0.05, 0.05)
         for pos in [(0.5, 0.5, 0.3), (-0.5, 0.3, 0.4), (0.3, -0.4, 0.5), (-0.4, -0.2, 0.3)]:
             glPushMatrix()
             glTranslatef(*pos)
