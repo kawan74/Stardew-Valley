@@ -9,6 +9,7 @@ from camera import Camera
 from player import Player
 from world import World
 from entities import Entities
+from plantacao import adicionar_plantas
 
 class JogoOpenGL:
     def __init__(self, largura=800, altura=800, titulo='Jogo'):
@@ -32,6 +33,8 @@ class JogoOpenGL:
         self.last_monster_spawn = 0
         self.monster_spawn_interval = 1
         self.dia_duracao = 20
+
+        adicionar_plantas(self)  # Chama a função ao inicializar o jogo
 
     def iniciar_janela(self):
         if not glfw.init():
